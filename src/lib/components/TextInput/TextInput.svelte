@@ -76,6 +76,7 @@
 		onChange,
 		onEnter,
 		onkeydown,
+		oninput,
 		containerClass,
 		controlClass,
 		id: idProp,
@@ -105,6 +106,7 @@
 		const next = (e.currentTarget as HTMLInputElement).value;
 		value = next;
 		onChange?.(next, e);
+		(oninput as ((e: Event) => void) | undefined)?.(e);
 	}
 
 	function handleKeydown(e: KeyboardEvent & { currentTarget: EventTarget & HTMLInputElement }) {

@@ -74,7 +74,9 @@
 	const iconSize = $derived(iconSizeByButtonSize[size]);
 	setIconDefaultSize(() => iconSize);
 
-	let isPending = $state(false);
+	// Count in-flight clickActions so an earlier one settling can't clear a newer one's loading state.
+	let pendingCount = $state(0);
+	const isPending = $derived(pendingCount > 0);
 	const isLoadingState = $derived(isLoading || isPending);
 	const delaySpinner = $derived(isPending || isInterruptible);
 	const isBusyOnlyDisabled = $derived(!isDisabled && isLoadingState && !isInterruptible);
@@ -99,11 +101,11 @@
 		}
 		(onclick as MouseEventHandler<HTMLElement> | undefined)?.(e as MouseEvent & { currentTarget: HTMLElement });
 		if (clickAction && !e.defaultPrevented) {
-			isPending = true;
+			pendingCount += 1;
 			try {
 				await clickAction(e);
 			} finally {
-				isPending = false;
+				pendingCount -= 1;
 			}
 		}
 	}
@@ -287,7 +289,7 @@
 			gap: inherit;
 			min-width: 0;
 		}
-		.hidden { color: transparent; }
+		.hidden { visibility: hidden; }
 		.hidden-delayed { animation: astryx-content-hide 1ms forwards var(--duration-medium-min); }
 		.icon-wrapper { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
 		.icon-wrapper[data-icon-size='sm'] { width: 1rem; height: 1rem; }
@@ -303,8 +305,8 @@
 	}
 
 	@keyframes astryx-content-hide {
-		from { color: inherit; }
-		to { color: transparent; }
+		from { visibility: visible; }
+		to { visibility: hidden; }
 	}
 	@keyframes astryx-fade-in {
 		from { opacity: 0; }

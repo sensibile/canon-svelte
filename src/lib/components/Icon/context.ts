@@ -8,6 +8,7 @@ export function setIconDefaultSize(size: () => IconSize | undefined) {
 	setContext(KEY, size);
 }
 
-export function getIconDefaultSize(): IconSize | undefined {
-	return getContext<(() => IconSize | undefined) | undefined>(KEY)?.();
+/** Returns the parent's getter; call it inside a $derived so the size stays reactive. */
+export function getIconDefaultSize(): () => IconSize | undefined {
+	return getContext<(() => IconSize | undefined) | undefined>(KEY) ?? (() => undefined);
 }

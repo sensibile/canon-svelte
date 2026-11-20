@@ -48,7 +48,7 @@
 	let { icon, color = 'inherit', size, label, class: className, ...rest }: Props = $props();
 
 	const contextSize = getIconDefaultSize();
-	const resolvedSize = $derived(size ?? contextSize ?? 'md');
+	const resolvedSize = $derived(size ?? contextSize() ?? 'md');
 	const glyph = $derived(
 		typeof icon === 'string' ? (defaultIcons as Record<string, IconGlyph>)[icon] : undefined
 	);
