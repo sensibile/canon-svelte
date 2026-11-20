@@ -15,6 +15,7 @@
 	import DropdownMenuDivider from './DropdownMenuDivider.svelte';
 	import DropdownMenuGroup from './DropdownMenuGroup.svelte';
 	import { setDropdownMenuContext } from './context.js';
+	import { observeChildren } from '../../internal/observeChildren.js';
 	import type { DropdownMenuOption } from './types.js';
 	import type { ComponentProps } from 'svelte';
 	import type { LayerAlignment, LayerPlacement } from '../../internal/position.js';
@@ -71,10 +72,11 @@
 	let focusOnOpen: 'first' | 'last' | 'menu' = 'menu';
 
 	$effect(() => {
-		if (!wrapper) return;
-		triggerEl = wrapper.matches('button, [role="button"]')
-			? wrapper
-			: wrapper.querySelector<HTMLElement>('button, [role="button"]');
+		const root = wrapper;
+		if (!root) return;
+		return observeChildren(root, () => {
+			triggerEl = root.querySelector<HTMLElement>('button, [role="button"]');
+		});
 	});
 
 	function setOpen(next: boolean, restoreFocus = false) {
@@ -219,7 +221,7 @@
 	{placement}
 	{alignment}
 	offset={4}
-	matchAnchorWidth
+	matchAnchorWidth={menuWidth == null}
 	bind:element={surface}
 	class={['astryx-dropdown-menu-surface', className].filter(Boolean).join(' ')}
 	style={menuWidth != null ? `min-width: ${cssSize(menuWidth)}` : undefined}

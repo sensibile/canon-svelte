@@ -9,19 +9,23 @@ export const FOCUSABLE_SELECTOR = [
 	'[contenteditable="true"]'
 ].join(',');
 
-export function focusables(root: HTMLElement): HTMLElement[] {
+/**
+ * Sequential tab stops in `root`. aria-disabled controls stay focusable (e.g. a loading Button),
+ * so they count unless `skipAriaDisabled` is set (used when picking where focus starts).
+ */
+export function focusables(root: HTMLElement, skipAriaDisabled = false): HTMLElement[] {
 	return Array.from(root.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
 		(el) =>
 			el.tabIndex >= 0 &&
 			!el.closest('[inert]') &&
-			el.getAttribute('aria-disabled') !== 'true' &&
+			!(skipAriaDisabled && el.getAttribute('aria-disabled') === 'true') &&
 			el.offsetParent !== null
 	);
 }
 
 /** Focus `[data-autofocus]`, else the first focusable, else the root itself. */
 export function focusFirst(root: HTMLElement) {
-	const target = root.querySelector<HTMLElement>('[data-autofocus]') ?? focusables(root)[0];
+	const target = root.querySelector<HTMLElement>('[data-autofocus]') ?? focusables(root, true)[0];
 	if (target) {
 		target.focus({ preventScroll: true });
 		return;

@@ -11,6 +11,7 @@
 <script lang="ts">
 	import { untrack, type Snippet } from 'svelte';
 	import Layer from '../Layer/Layer.svelte';
+	import { observeChildren } from '../../internal/observeChildren.js';
 	import type { LayerAlignment, LayerPlacement } from '../../internal/position.js';
 
 	interface Props {
@@ -68,10 +69,14 @@
 	let trigger = $state<HTMLElement | null>(null);
 	let textOnly = $state(false);
 	$effect(() => {
-		if (!wrapper) return;
-		const first = wrapper.firstElementChild as HTMLElement | null;
-		textOnly = first == null;
-		trigger = first ?? wrapper;
+		const root = wrapper;
+		if (!root) return;
+		// Re-resolve when the child is swapped (e.g. a Button switching between <a> and <button>).
+		return observeChildren(root, () => {
+			const first = root.firstElementChild as HTMLElement | null;
+			textOnly = first == null;
+			trigger = first ?? root;
+		});
 	});
 	const anchorEl = $derived(anchor ?? trigger);
 	const showIndication = $derived(hasHoverIndication === true || (hasHoverIndication === 'auto' && textOnly));

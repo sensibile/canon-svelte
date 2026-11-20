@@ -9,6 +9,7 @@
 	import Layer from '../Layer/Layer.svelte';
 	import { focusFirst, trapFocus } from '../../internal/focus.js';
 	import { pushLayer } from '../../internal/layerStack.js';
+	import { observeChildren } from '../../internal/observeChildren.js';
 	import type { LayerAlignment, LayerPlacement } from '../../internal/position.js';
 	import { cssSize, spacingVar, type SizeValue, type SpacingStep } from '../../types.js';
 
@@ -80,9 +81,11 @@
 	$effect(() => {
 		const root = anchor ?? wrapper;
 		if (!root) return;
-		trigger = root.matches('button, [role="button"]')
-			? root
-			: root.querySelector<HTMLElement>('button, [role="button"]');
+		return observeChildren(root, () => {
+			trigger = root.matches('button, [role="button"]')
+				? root
+				: root.querySelector<HTMLElement>('button, [role="button"]');
+		});
 	});
 
 	function setOpen(next: boolean, restoreFocus = false) {
