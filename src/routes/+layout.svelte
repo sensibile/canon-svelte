@@ -10,7 +10,11 @@
 <Theme theme="neutral" {mode}>
 	<div class="shell">
 		<header>
-			<strong>canon-svelte</strong>
+			<nav>
+				<strong>canon-svelte</strong>
+				<a href="/">Tokens</a>
+				<a href="/components">Components</a>
+			</nav>
 			<label>
 				Mode
 				<select bind:value={mode}>
@@ -38,6 +42,18 @@
 		justify-content: space-between;
 		align-items: center;
 		margin-bottom: var(--spacing-8);
+	}
+	nav {
+		display: flex;
+		gap: var(--spacing-4);
+		align-items: baseline;
+	}
+	nav a {
+		color: var(--color-text-secondary);
+		text-decoration: none;
+	}
+	nav a:hover {
+		color: var(--color-text-primary);
 	}
 	select {
 		margin-left: var(--spacing-2);

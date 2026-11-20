@@ -21,11 +21,24 @@ styles are written as Svelte scoped CSS on top of Astryx's CSS custom-property t
 `mode` is `"light"`, `"dark"` or `"system"`. The outermost `Theme` also sets `data-astryx-theme`
 and `data-theme` on `<html>` so portaled content and browser chrome follow it.
 
+## Components
+
+Ported so far (props follow Astryx; see each file's header for what isn't ported yet):
+
+- Content: `Text`, `Heading`, `Icon`, `Badge`, `Spinner`, `VisuallyHidden`
+- Action: `Button`, `IconButton`, `Link`
+- Layout: `Stack`, `HStack`, `VStack`, `Divider`
+- Form: `Field`, `FieldLabel`, `FieldStatus`, `TextInput`, `CheckboxInput`, `Switch`
+
+Form controls support `bind:value` as well as Astryx's `value` + `onChange(value, event)`.
+Component styles live in `@layer astryx-base` and keep Astryx's `astryx-*` class names and `data-*`
+attributes, so theme CSS (`@layer astryx-theme`) overrides them the same way it does in Astryx.
+
 ## Develop
 
 ```sh
 pnpm install
-pnpm dev          # docs site at localhost:5173 (token gallery)
+pnpm dev          # docs site at localhost:5173 (tokens and component gallery)
 pnpm check        # svelte-check
 pnpm build        # docs build + package to dist/
 pnpm sync:astryx  # re-pull reset/tokens/neutral theme CSS from the Astryx npm packages
