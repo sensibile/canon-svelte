@@ -16,6 +16,7 @@
 	import DropdownMenuGroup from './DropdownMenuGroup.svelte';
 	import { setDropdownMenuContext } from './context.js';
 	import { observeChildren } from '../../internal/observeChildren.js';
+	import { pushLayer } from '../../internal/layerStack.js';
 	import type { DropdownMenuOption } from './types.js';
 	import type { ComponentProps } from 'svelte';
 	import type { LayerAlignment, LayerPlacement } from '../../internal/position.js';
@@ -148,14 +149,18 @@
 		if (!open || !el) return;
 		const doc = el.ownerDocument;
 		tick().then(() => focusItem(focusOnOpen));
+		const layer = pushLayer();
 		const onPointerDown = (e: PointerEvent) => {
+			// Presses inside a foreground layer (e.g. a Dialog opened from the header) aren't outside presses.
+			if (!layer.isTop()) return;
 			const t = e.target as Node;
 			if (el.contains(t) || triggerEl?.contains(t)) return;
 			setOpen(false);
 		};
 		// Escape is handled on the whole surface so header and footer controls can dismiss too.
 		const onKey = (e: KeyboardEvent) => {
-			if (e.key !== 'Escape' || e.defaultPrevented) return;
+			// Escape bubbling up from a foreground layer (e.g. a Dialog) belongs to that layer.
+			if (e.key !== 'Escape' || e.defaultPrevented || !layer.isTop()) return;
 			e.preventDefault();
 			e.stopPropagation();
 			setOpen(false, true);
@@ -163,6 +168,7 @@
 		doc.addEventListener('pointerdown', onPointerDown, true);
 		el.addEventListener('keydown', onKey);
 		return () => {
+			layer.remove();
 			doc.removeEventListener('pointerdown', onPointerDown, true);
 			el.removeEventListener('keydown', onKey);
 		};
