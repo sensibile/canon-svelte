@@ -37,7 +37,8 @@ export function focusFirst(root: HTMLElement) {
 /** Keep Tab / Shift+Tab inside `root`. Returns a cleanup function. */
 export function trapFocus(root: HTMLElement): () => void {
 	const onKey = (e: KeyboardEvent) => {
-		if (e.key !== 'Tab') return;
+		// A nested trap inside this one already handled it.
+		if (e.key !== 'Tab' || e.defaultPrevented) return;
 		const items = focusables(root);
 		if (items.length === 0) {
 			e.preventDefault();

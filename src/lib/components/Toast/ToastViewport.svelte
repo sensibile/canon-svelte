@@ -30,8 +30,9 @@
 	const live = $derived(toastQueue.entries.filter((t) => !t.isExiting));
 	// Oldest toasts beyond maxVisible are dismissed.
 	$effect(() => {
-		const overflow = live.length - maxVisible;
-		for (let i = 0; i < overflow; i++) toastQueue.remove(live[i].id, 'auto');
+		// Snapshot first: each remove() changes `live`.
+		const overflowIds = live.slice(0, Math.max(0, live.length - maxVisible)).map((t) => t.id);
+		for (const id of overflowIds) toastQueue.remove(id, 'auto');
 	});
 
 	const hasToasts = $derived(toastQueue.entries.length > 0);
