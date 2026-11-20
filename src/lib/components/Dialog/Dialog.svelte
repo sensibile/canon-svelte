@@ -17,6 +17,7 @@
 	import { focusFirst } from '../../internal/focus.js';
 	import { setDialogContext } from './context.js';
 	import { pushLayer } from '../../internal/layerStack.js';
+	import { lockScroll } from '../../internal/scrollLock.js';
 
 	interface Props extends Omit<HTMLDialogAttributes, 'open'> {
 		isOpen: boolean;
@@ -59,9 +60,7 @@
 		hasTitle = el.querySelector(`#${CSS.escape(titleId)}`) != null;
 		focusFirst(el);
 		// Lock page scroll behind the modal.
-		const root = el.ownerDocument.documentElement;
-		const prevOverflow = root.style.overflow;
-		root.style.overflow = 'hidden';
+		const unlockScroll = lockScroll(el.ownerDocument);
 		// Register so a popover behind this dialog doesn't take its Escape.
 		const layer = pushLayer();
 		// A <form method="dialog"> closes the element natively; tell the owner.
@@ -72,7 +71,7 @@
 		return () => {
 			el.removeEventListener('close', onClose);
 			layer.remove();
-			root.style.overflow = prevOverflow;
+			unlockScroll();
 			if (el.open) el.close();
 			if (opener?.isConnected) opener.focus({ preventScroll: true });
 		};

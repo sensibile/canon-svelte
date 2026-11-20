@@ -143,7 +143,8 @@
 		const untrap = isModal ? trapFocus(el) : () => {};
 		const layer = pushLayer();
 		const onPointerDown = (e: PointerEvent) => {
-			if (!hasLightDismiss) return;
+			// A press inside a foreground layer (e.g. a Dialog opened from here) isn't an outside press.
+			if (!hasLightDismiss || !layer.isTop()) return;
 			const t = e.target as Node;
 			if (el.contains(t) || trigger?.contains(t)) return;
 			setOpen(false);

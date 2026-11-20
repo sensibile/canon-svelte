@@ -155,12 +155,14 @@
 	$effect(() => clearTimers);
 </script>
 
-<!-- svelte-ignore a11y_no_static_element_interactions -->
+<!-- A plain-text trigger is a focus stop so keyboard users can reach its tooltip. -->
+<!-- svelte-ignore a11y_no_static_element_interactions, a11y_no_noninteractive_tabindex -->
 <span
 	bind:this={wrapper}
 	class="tooltip-trigger"
 	class:inline={textOnly}
 	class:indication={showIndication}
+	tabindex={textOnly && focusTrigger !== 'never' && isEnabled ? 0 : undefined}
 	{onpointerover}
 	{onpointerout}
 	{onfocusin}
