@@ -13,18 +13,18 @@
 		position?: ToastPosition;
 		maxVisible?: number;
 		children?: Snippet;
+		/** @internal Set on the viewport showToast() auto-mounts when none is rendered. */
+		isFallback?: boolean;
 	}
-	let { position = 'bottomEnd', maxVisible = 5, children }: Props = $props();
+	let { position = 'bottomEnd', maxVisible = 5, children, isFallback = false }: Props = $props();
 
 	let viewport: HTMLDivElement | undefined = $state();
 	const isTop = $derived(position === 'topEnd' || position === 'topStart');
 	const isStart = $derived(position === 'topStart' || position === 'bottomStart');
 
+	// An explicit viewport registers and retires the fallback, so toasts render once.
 	$effect(() => {
-		toastQueue.viewports += 1;
-		return () => {
-			toastQueue.viewports -= 1;
-		};
+		if (!isFallback) return toastQueue.attachViewport();
 	});
 
 	const live = $derived(toastQueue.entries.filter((t) => !t.isExiting));

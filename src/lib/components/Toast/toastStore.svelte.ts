@@ -1,6 +1,6 @@
 // Toast queue shared by showToast()/useToast() and ToastViewport.
 // Port of the queue in Astryx ToastViewport/useToast (packages/core/src/Toast), MIT, Meta Platforms, Inc.
-import { mount, type Snippet } from 'svelte';
+import { mount, unmount, type Snippet } from 'svelte';
 
 export type ToastType = 'info' | 'error';
 export type ToastPosition = 'topEnd' | 'topStart' | 'bottomEnd' | 'bottomStart';
@@ -32,9 +32,10 @@ export interface ToastEntry {
 
 class ToastQueue {
 	entries = $state<ToastEntry[]>([]);
+	/** Explicitly rendered viewports; the auto-mounted fallback doesn't count. */
 	viewports = 0;
 	#seq = 0;
-	#fallbackMounted = false;
+	#fallback: { target: HTMLElement; app?: Record<string, unknown> } | null = null;
 
 	add(options: ToastOptions): ToastDismissFn {
 		this.#ensureViewport();
@@ -65,14 +66,36 @@ class ToastQueue {
 		this.entries = this.entries.filter((t) => t.id !== id);
 	}
 
+	/** Called by an explicit ToastViewport; it takes over from the fallback. */
+	attachViewport(): () => void {
+		this.viewports += 1;
+		this.#retireFallback();
+		return () => {
+			this.viewports -= 1;
+		};
+	}
+
 	#ensureViewport() {
-		if (this.viewports > 0 || this.#fallbackMounted || typeof document === 'undefined') return;
-		this.#fallbackMounted = true;
+		if (this.viewports > 0 || this.#fallback || typeof document === 'undefined') return;
 		const target = document.createElement('div');
 		target.setAttribute('data-astryx-toast-fallback', '');
 		document.body.appendChild(target);
+		const fallback: { target: HTMLElement; app?: Record<string, unknown> } = { target };
+		this.#fallback = fallback;
 		// Lazy import keeps the viewport out of bundles that never show a toast.
-		import('./ToastViewport.svelte').then(({ default: ToastViewport }) => mount(ToastViewport, { target }));
+		import('./ToastViewport.svelte').then(({ default: ToastViewport }) => {
+			// Retired while the import was pending (an explicit viewport mounted).
+			if (this.#fallback !== fallback) return;
+			fallback.app = mount(ToastViewport, { target, props: { isFallback: true } });
+		});
+	}
+
+	#retireFallback() {
+		const fallback = this.#fallback;
+		if (!fallback) return;
+		this.#fallback = null;
+		if (fallback.app) unmount(fallback.app);
+		fallback.target.remove();
 	}
 }
 

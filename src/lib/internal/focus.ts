@@ -17,6 +17,8 @@ export function focusables(root: HTMLElement, skipAriaDisabled = false): HTMLEle
 	const all = Array.from(root.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
 		(el) =>
 			el.tabIndex >= 0 &&
+			// Native disabled state, including controls inside a disabled fieldset.
+			!el.matches(':disabled') &&
 			!el.closest('[inert]') &&
 			!(skipAriaDisabled && el.getAttribute('aria-disabled') === 'true') &&
 			el.offsetParent !== null
