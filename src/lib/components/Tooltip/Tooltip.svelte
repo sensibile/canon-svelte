@@ -109,6 +109,8 @@
 		clearTimers();
 		showTimer = setTimeout(() => setOpen(true), ms);
 	}
+	// With no hideDelay, a short grace lets the pointer cross the gap onto the tooltip (WCAG 1.4.13).
+	const HOVER_BRIDGE_DELAY = 100;
 	function scheduleHide(ms = hideDelay) {
 		clearTimers();
 		if (ms <= 0) setOpen(false);
@@ -121,7 +123,7 @@
 	}
 	function onpointerout(e: PointerEvent) {
 		if (wrapper?.contains(e.relatedTarget as Node)) return;
-		scheduleHide();
+		scheduleHide(hideDelay > 0 ? hideDelay : HOVER_BRIDGE_DELAY);
 	}
 	function onfocusin(e: FocusEvent) {
 		if (focusTrigger === 'never') return;
@@ -178,7 +180,7 @@
 	role="tooltip"
 	class="astryx-tooltip"
 	onpointerenter={() => clearTimers()}
-	onpointerleave={() => scheduleHide()}
+	onpointerleave={() => scheduleHide(hideDelay > 0 ? hideDelay : HOVER_BRIDGE_DELAY)}
 >
 	<div class="content">
 		{#if typeof content === 'function'}{@render content()}{:else}{content}{/if}

@@ -32,10 +32,8 @@ function toFloating(placement: LayerPlacement, alignment: LayerAlignment, rtl: b
 					? 'left'
 					: 'right';
 	if (alignment === 'center') return side;
-	const vertical = side === 'top' || side === 'bottom';
-	// For above/below, start/end follow the writing direction.
-	const startIsLogical = vertical && rtl ? alignment === 'end' : alignment === 'start';
-	return `${side}-${startIsLogical ? 'start' : 'end'}` as Placement;
+	// floating-ui already mirrors -start/-end for top/bottom in RTL, so the suffix passes through.
+	return `${side}-${alignment}` as Placement;
 }
 
 const sideToPlacement: Record<string, LayerPlacement> = {
