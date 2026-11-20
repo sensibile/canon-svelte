@@ -1,0 +1,6 @@
+/* Base stylesheet: import once at your app root, then import a theme.
+ *   import 'canon-svelte/astryx.css';
+ *   import 'canon-svelte/themes/neutral.css';
+ */
+@import './reset.css';
+@import './tokens.css';

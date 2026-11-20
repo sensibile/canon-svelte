@@ -1,0 +1,59 @@
+{
+	"name": "canon-svelte",
+	"version": "0.0.1",
+	"keywords": [
+		"svelte"
+	],
+	"files": [
+		"dist",
+		"!dist/**/*.test.*",
+		"!dist/**/*.spec.*"
+	],
+	"type": "module",
+	"sideEffects": [
+		"**/*.css"
+	],
+	"types": "./dist/index.d.ts",
+	"svelte": "./dist/index.js",
+	"imports": {
+		"#lib": "./src/lib/index.js",
+		"#lib/*": "./src/lib/*"
+	},
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"svelte": "./dist/index.js"
+		},
+		"./astryx.css": "./dist/styles/astryx.css",
+		"./reset.css": "./dist/styles/reset.css",
+		"./tokens.css": "./dist/styles/tokens.css",
+		"./themes/neutral.css": "./dist/themes/neutral.css"
+	},
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build && npm run prepack",
+		"preview": "vite preview",
+		"prepare": "svelte-kit sync || echo ''",
+		"prepack": "svelte-kit sync && svelte-package && publint",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"sync:astryx": "node scripts/sync-astryx.mjs"
+	},
+	"devDependencies": {
+		"@sveltejs/adapter-auto": "^8.0.1",
+		"@sveltejs/kit": "^3.2.0",
+		"@sveltejs/package": "^3.0.2",
+		"@sveltejs/vite-plugin-svelte": "^7.3.1",
+		"publint": "^0.3.25",
+		"svelte": "^5.57.3",
+		"svelte-check": "^4.7.8",
+		"typescript": "^6.0.3",
+		"vite": "^8.3.8"
+	},
+	"peerDependencies": {
+		"svelte": "^5.0.0"
+	},
+	"description": "Svelte 5 port of the Astryx design system.",
+	"license": "MIT",
+	"packageManager": "pnpm@10.28.0"
+}
