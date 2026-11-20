@@ -80,6 +80,13 @@
 		data-variant={variant}
 		{onclick}
 		{onpointermove}
+		onkeydown={(e) => {
+			// Links don't activate on Space natively; menu items should.
+			if (e.key === ' ') {
+				e.preventDefault();
+				(e.currentTarget as HTMLElement).click();
+			}
+		}}
 	>
 		{@render body()}
 	</a>

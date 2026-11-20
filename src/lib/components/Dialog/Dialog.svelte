@@ -16,6 +16,7 @@
 	import { cssSize, spacingVar, type SizeValue, type SpacingStep } from '../../types.js';
 	import { focusFirst } from '../../internal/focus.js';
 	import { setDialogContext } from './context.js';
+	import { pushLayer } from '../../internal/layerStack.js';
 
 	interface Props extends Omit<HTMLDialogAttributes, 'open'> {
 		isOpen: boolean;
@@ -61,7 +62,16 @@
 		const root = el.ownerDocument.documentElement;
 		const prevOverflow = root.style.overflow;
 		root.style.overflow = 'hidden';
+		// Register so a popover behind this dialog doesn't take its Escape.
+		const layer = pushLayer();
+		// A <form method="dialog"> closes the element natively; tell the owner.
+		const onClose = () => {
+			if (isOpen) onOpenChange(false);
+		};
+		el.addEventListener('close', onClose);
 		return () => {
+			el.removeEventListener('close', onClose);
+			layer.remove();
 			root.style.overflow = prevOverflow;
 			if (el.open) el.close();
 			if (opener?.isConnected) opener.focus({ preventScroll: true });

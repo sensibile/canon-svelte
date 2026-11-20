@@ -189,6 +189,8 @@
 				setOpen(false);
 				return;
 		}
+		// Space activates the focused item; it only extends a typeahead already in progress.
+		if (e.key === ' ' && typeahead === '') return;
 		if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
 			clearTimeout(typeaheadTimer);
 			typeahead += e.key.toLowerCase();

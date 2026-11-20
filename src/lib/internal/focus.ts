@@ -46,10 +46,16 @@ export function trapFocus(root: HTMLElement): () => void {
 		const first = items[0];
 		const last = items[items.length - 1];
 		const active = root.ownerDocument.activeElement;
-		if (e.shiftKey && (active === first || !root.contains(active))) {
+		const inside = active != null && root.contains(active);
+		// Focus can sit on a non-tab-stop (e.g. a roving-tabindex tab reached with arrows),
+		// so compare document positions rather than identity with first/last.
+		const follows = (a: Node, b: Node) => (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0;
+		const atStart = !inside || active === first || !items.some((el) => follows(el, active));
+		const atEnd = !inside || active === last || !items.some((el) => follows(active, el));
+		if (e.shiftKey && atStart) {
 			e.preventDefault();
 			last.focus();
-		} else if (!e.shiftKey && (active === last || !root.contains(active))) {
+		} else if (!e.shiftKey && atEnd) {
 			e.preventDefault();
 			first.focus();
 		}
