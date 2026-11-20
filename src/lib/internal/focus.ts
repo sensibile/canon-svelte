@@ -14,13 +14,25 @@ export const FOCUSABLE_SELECTOR = [
  * so they count unless `skipAriaDisabled` is set (used when picking where focus starts).
  */
 export function focusables(root: HTMLElement, skipAriaDisabled = false): HTMLElement[] {
-	return Array.from(root.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
+	const all = Array.from(root.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
 		(el) =>
 			el.tabIndex >= 0 &&
 			!el.closest('[inert]') &&
 			!(skipAriaDisabled && el.getAttribute('aria-disabled') === 'true') &&
 			el.offsetParent !== null
 	);
+	return all.filter((el) => isRadioTabStop(el, all));
+}
+
+/** A named radio group is one tab stop: its checked radio, or its first radio when none is checked. */
+function isRadioTabStop(el: HTMLElement, candidates: HTMLElement[]): boolean {
+	if (!(el instanceof HTMLInputElement) || el.type !== 'radio' || !el.name) return true;
+	const group = candidates.filter(
+		(c): c is HTMLInputElement =>
+			c instanceof HTMLInputElement && c.type === 'radio' && c.name === el.name && c.form === el.form
+	);
+	const checked = group.find((r) => r.checked);
+	return el === (checked ?? group[0]);
 }
 
 /** Focus `[data-autofocus]`, else the first focusable, else the root itself. */
