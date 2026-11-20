@@ -153,8 +153,19 @@
 			if (el.contains(t) || triggerEl?.contains(t)) return;
 			setOpen(false);
 		};
+		// Escape is handled on the whole surface so header and footer controls can dismiss too.
+		const onKey = (e: KeyboardEvent) => {
+			if (e.key !== 'Escape' || e.defaultPrevented) return;
+			e.preventDefault();
+			e.stopPropagation();
+			setOpen(false, true);
+		};
 		doc.addEventListener('pointerdown', onPointerDown, true);
-		return () => doc.removeEventListener('pointerdown', onPointerDown, true);
+		el.addEventListener('keydown', onKey);
+		return () => {
+			doc.removeEventListener('pointerdown', onPointerDown, true);
+			el.removeEventListener('keydown', onKey);
+		};
 	});
 
 	let typeahead = '';
@@ -179,11 +190,6 @@
 			case 'End':
 				e.preventDefault();
 				go(list.length - 1);
-				return;
-			case 'Escape':
-				e.preventDefault();
-				e.stopPropagation();
-				setOpen(false, true);
 				return;
 			case 'Tab':
 				setOpen(false);

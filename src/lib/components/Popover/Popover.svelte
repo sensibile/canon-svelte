@@ -160,6 +160,9 @@
 			const next = e.relatedTarget as Node | null;
 			if (isModal || !hasLightDismiss || !next) return;
 			if (el.contains(next) || trigger?.contains(next)) return;
+			// Focus moving into a foreground layer (e.g. a Dialog opened from here, which focuses
+			// itself before registering its layer) isn't focus leaving the popover.
+			if (!layer.isTop() || (next instanceof Element && next.closest('dialog:modal'))) return;
 			setOpen(false);
 		};
 		doc.addEventListener('pointerdown', onPointerDown, true);

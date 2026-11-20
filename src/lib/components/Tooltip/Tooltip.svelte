@@ -121,18 +121,29 @@
 		if (e.pointerType === 'touch') return;
 		scheduleShow();
 	}
+	// Hover and focus are tracked separately: leaving with the pointer keeps a focus-opened tooltip.
+	let focusHeld = false;
+	function onPointerLeave() {
+		if (focusHeld) {
+			clearTimers();
+			return;
+		}
+		scheduleHide(hideDelay > 0 ? hideDelay : HOVER_BRIDGE_DELAY);
+	}
 	function onpointerout(e: PointerEvent) {
 		if (wrapper?.contains(e.relatedTarget as Node)) return;
-		scheduleHide(hideDelay > 0 ? hideDelay : HOVER_BRIDGE_DELAY);
+		onPointerLeave();
 	}
 	function onfocusin(e: FocusEvent) {
 		if (focusTrigger === 'never') return;
 		const target = e.target as HTMLElement;
 		if (focusTrigger === 'auto' && !target.matches(':focus-visible')) return;
+		focusHeld = true;
 		scheduleShow(0);
 	}
 	function onfocusout(e: FocusEvent) {
 		if (wrapper?.contains(e.relatedTarget as Node)) return;
+		focusHeld = false;
 		scheduleHide(0);
 	}
 	function onpointerdown() {
@@ -182,7 +193,7 @@
 	role="tooltip"
 	class="astryx-tooltip"
 	onpointerenter={() => clearTimers()}
-	onpointerleave={() => scheduleHide(hideDelay > 0 ? hideDelay : HOVER_BRIDGE_DELAY)}
+	onpointerleave={onPointerLeave}
 >
 	<div class="content">
 		{#if typeof content === 'function'}{@render content()}{:else}{content}{/if}
