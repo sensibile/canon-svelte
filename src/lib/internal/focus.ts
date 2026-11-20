@@ -51,10 +51,11 @@ export function focusFirst(root: HTMLElement) {
 }
 
 /** Keep Tab / Shift+Tab inside `root`. Returns a cleanup function. */
-export function trapFocus(root: HTMLElement): () => void {
+export function trapFocus(root: HTMLElement, isActive: () => boolean = () => true): () => void {
 	const onKey = (e: KeyboardEvent) => {
-		// A nested trap inside this one already handled it.
-		if (e.key !== 'Tab' || e.defaultPrevented) return;
+		// A nested trap inside this one already handled it, or a foreground layer
+		// (e.g. a native modal Dialog rendered inside) owns focus.
+		if (e.key !== 'Tab' || e.defaultPrevented || !isActive()) return;
 		const items = focusables(root);
 		if (items.length === 0) {
 			e.preventDefault();

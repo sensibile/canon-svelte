@@ -140,8 +140,8 @@
 		const doc = el.ownerDocument;
 		let frame = 0;
 		if (autoFocus) frame = requestAnimationFrame(() => focusFirst(el));
-		const untrap = isModal ? trapFocus(el) : () => {};
 		const layer = pushLayer();
+		const untrap = isModal ? trapFocus(el, layer.isTop) : () => {};
 		const onPointerDown = (e: PointerEvent) => {
 			// A press inside a foreground layer (e.g. a Dialog opened from here) isn't an outside press.
 			if (!hasLightDismiss || !layer.isTop()) return;
