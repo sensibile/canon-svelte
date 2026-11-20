@@ -21,7 +21,9 @@ export function focusables(root: HTMLElement, skipAriaDisabled = false): HTMLEle
 			!el.matches(':disabled') &&
 			!el.closest('[inert]') &&
 			!(skipAriaDisabled && el.getAttribute('aria-disabled') === 'true') &&
-			el.offsetParent !== null
+			el.offsetParent !== null &&
+			// visibility: hidden or collapse (own or inherited) isn't a tab stop either.
+			getComputedStyle(el).visibility === 'visible'
 	);
 	return all.filter((el) => isRadioTabStop(el, all));
 }

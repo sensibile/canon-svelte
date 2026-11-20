@@ -51,7 +51,9 @@
 			return;
 		}
 		onclick?.(e);
-		if (!e.defaultPrevented) ctx.select(value);
+		// A modified link click (new tab or window) or a non-primary button leaves this page as it is.
+		const opensElsewhere = isLink && (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey);
+		if (!e.defaultPrevented && !opensElsewhere) ctx.select(value);
 	}
 
 	const shared = $derived({
