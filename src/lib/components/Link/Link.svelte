@@ -1,10 +1,11 @@
 <!--
   Port of Astryx `Link` (packages/core/src/Link/Link.tsx), MIT, Meta Platforms, Inc.
   Renders <a> with href, a <button> when it only has onclick, and an inert link when disabled.
-  Not yet ported: `tooltip` (comes with Tooltip) and LinkProvider (custom router links).
+  Not yet ported: LinkProvider (custom router links).
 -->
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import Tooltip from '../Tooltip/Tooltip.svelte';
 	import type { HTMLAnchorAttributes } from 'svelte/elements';
 	import Text from '../Text/Text.svelte';
 	import Icon from '../Icon/Icon.svelte';
@@ -28,6 +29,8 @@
 		display?: TextDisplay;
 		maxLines?: number;
 		children: Snippet;
+		/** Tooltip text shown on hover and keyboard focus. */
+		tooltip?: string;
 	}
 
 	let {
@@ -50,6 +53,7 @@
 		onkeydown,
 		class: className,
 		children,
+		tooltip,
 		...rest
 	}: Props = $props();
 
@@ -93,6 +97,7 @@
 	{/if}
 {/snippet}
 
+{#snippet element()}
 {#if asButton}
 	<button
 		type="button"
@@ -132,6 +137,13 @@
 	>
 		{@render content()}
 	</a>
+{/if}
+{/snippet}
+
+{#if tooltip}
+	<Tooltip content={tooltip}>{@render element()}</Tooltip>
+{:else}
+	{@render element()}
 {/if}
 
 <style>

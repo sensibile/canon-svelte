@@ -1,6 +1,6 @@
 <!--
   Port of Astryx `Button` (packages/core/src/Button/Button.tsx), MIT, Meta Platforms, Inc.
-  Not yet ported: `tooltip` (comes with Tooltip), ButtonGroup/InputGroup integration,
+  Not yet ported: ButtonGroup/InputGroup integration,
   touch press feedback and hit-area expansion.
 -->
 <script lang="ts" module>
@@ -11,6 +11,7 @@
 
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import Tooltip from '../Tooltip/Tooltip.svelte';
 	import type { HTMLAttributes, HTMLButtonAttributes, MouseEventHandler } from 'svelte/elements';
 	import Icon, { type IconComponent, type IconSize } from '../Icon/Icon.svelte';
 	import type { IconName } from '../Icon/defaultIcons.js';
@@ -43,6 +44,8 @@
 		rel?: string;
 		/** Replaces the visible label; `label` stays the accessible name. */
 		children?: Snippet;
+		/** Tooltip text shown on hover and keyboard focus. */
+		tooltip?: string;
 	}
 
 	let {
@@ -63,6 +66,7 @@
 		target,
 		rel,
 		children,
+		tooltip,
 		class: className,
 		style,
 		onclick,
@@ -159,6 +163,7 @@
 	</VisuallyHidden>
 {/snippet}
 
+{#snippet element()}
 {#if renderAsLink}
 	<a
 		{...rest as HTMLAttributes<HTMLAnchorElement>}
@@ -184,6 +189,13 @@
 	>
 		{@render content()}
 	</button>
+{/if}
+{/snippet}
+
+{#if tooltip}
+	<Tooltip content={tooltip}>{@render element()}</Tooltip>
+{:else}
+	{@render element()}
 {/if}
 
 <style>

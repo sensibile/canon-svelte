@@ -1,7 +1,7 @@
 <!--
   Port of Astryx `Field` + `FieldLabel` (packages/core/src/Field), MIT, Meta Platforms, Inc.
   Wraps a control with its label, description and status message.
-  Not yet ported: `labelTooltip` (InfoTip) and FormLayout's horizontal-labels mode.
+  Not yet ported: FormLayout's horizontal-labels mode.
 -->
 <script lang="ts">
 	import type { Snippet } from 'svelte';
@@ -27,6 +27,8 @@
 		isRequired?: boolean;
 		isDisabled?: boolean;
 		labelIcon?: IconName | IconComponent;
+		/** Help text shown in an InfoTip next to the label. */
+		labelTooltip?: string;
 		status?: FieldStatusInput;
 		statusVariant?: FieldStatusPlacement;
 		width?: SizeValue;
@@ -45,6 +47,7 @@
 		isRequired = false,
 		isDisabled = false,
 		labelIcon,
+		labelTooltip,
 		status,
 		statusVariant = 'attached',
 		width,
@@ -82,6 +85,7 @@
 		{isOptional}
 		{isRequired}
 		{labelIcon}
+		{labelTooltip}
 		{description}
 		descriptionID={resolvedDescriptionID}
 	/>
@@ -106,8 +110,8 @@
 			isolation: isolate;
 			--_field-status-overlap: calc(var(--size-element-md) / 2);
 		}
-		.input-status:has(> :global([data-size='sm'])) { --_field-status-overlap: calc(var(--size-element-sm) / 2); }
-		.input-status:has(> :global([data-size='lg'])) { --_field-status-overlap: calc(var(--size-element-lg) / 2); }
+		.input-status:has(> :global([data-size='sm']), > :global(.tooltip-trigger > [data-size='sm'])) { --_field-status-overlap: calc(var(--size-element-sm) / 2); }
+		.input-status:has(> :global([data-size='lg']), > :global(.tooltip-trigger > [data-size='lg'])) { --_field-status-overlap: calc(var(--size-element-lg) / 2); }
 
 	}
 </style>

@@ -3,12 +3,21 @@
 		Badge,
 		Button,
 		CheckboxInput,
+		Dialog,
+		DialogHeader,
 		Divider,
+		DropdownMenu,
 		Heading,
 		HStack,
 		Icon,
 		IconButton,
+		InfoTip,
 		Link,
+		Popover,
+		Tab,
+		TabList,
+		Tooltip,
+		showToast,
 		Spinner,
 		Switch,
 		Text,
@@ -17,6 +26,8 @@
 		defaultIcons,
 		type BadgeVariant,
 		type CheckboxValue,
+		type DialogPurpose,
+		type DropdownMenuOption,
 		type IconName
 	} from '#lib';
 
@@ -36,6 +47,23 @@
 	const iconNames = Object.keys(defaultIcons).filter((n) => !n.includes(':')) as IconName[];
 
 	const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+	let dialogPurpose = $state<DialogPurpose | null>(null);
+	let tab = $state('overview');
+	let navTab = $state('home');
+	let lastAction = $state('none');
+	const menuItems: DropdownMenuOption[] = [
+		{ label: 'Edit', icon: 'wrench', onClick: () => (lastAction = 'Edit') },
+		{ label: 'Duplicate', icon: 'copy', description: 'Make a copy in this folder', onClick: () => (lastAction = 'Duplicate') },
+		{ label: 'Share', isDisabled: true },
+		{ type: 'divider' },
+		{
+			type: 'section',
+			title: 'Danger zone',
+			items: [{ label: 'Delete', variant: 'destructive', onClick: () => (lastAction = 'Delete') }]
+		}
+	];
+	let toastCount = 0;
 </script>
 
 <svelte:head><title>canon-svelte · Components</title></svelte:head>
@@ -155,7 +183,7 @@
 				<TextInput label="Search" bind:value={search} startIcon="search" hasClear isOptional />
 				<TextInput label="Username" value="taken" status={{ type: 'warning', message: 'Someone may already use this name.' }} statusVariant="detached" size="lg" />
 				<TextInput label="Loading" value="Checking…" isLoading size="sm" />
-				<TextInput label="Disabled" value="Read only" isDisabled />
+				<TextInput label="Disabled" value="Read only" isDisabled disabledMessage="You need the Editor role to change this." labelTooltip="Only editors can rename." />
 			</VStack>
 			<VStack gap={4}>
 				<CheckboxInput label="I agree to the terms" bind:value={agree} description="You can change this later." />
@@ -172,6 +200,82 @@
 			</VStack>
 		</div>
 	</section>
+
+	<section>
+		<Heading level={2}>Overlays</Heading>
+		<div class="demo">
+			<VStack gap={6}>
+				<HStack gap={3} vAlign="center" wrap="wrap">
+					<Button label="Save" tooltip="Save your changes (⌘S)" />
+					<Tooltip content="Shown below" placement="below"><Button label="Below" variant="ghost" /></Tooltip>
+					<Text>A <Tooltip content="Dashed underline marks a text trigger">term</Tooltip> with a tooltip.</Text>
+					<HStack gap={1} vAlign="center"><Text>InfoTip</Text><InfoTip content="Click to pin this open." /></HStack>
+				</HStack>
+
+				<HStack gap={3} vAlign="center" wrap="wrap">
+					<Popover label="Filters" hasCloseButton>
+						<Button label="Popover" />
+						{#snippet content(close)}
+							<VStack gap={3}>
+								<Text weight="semibold">Filters</Text>
+								<CheckboxInput label="Only open items" />
+								<Button label="Apply" variant="primary" size="sm" onclick={close} />
+							</VStack>
+						{/snippet}
+					</Popover>
+					<DropdownMenu button={{ label: 'Actions' }} items={menuItems} />
+					<Text type="supporting">Last menu action: {lastAction}</Text>
+				</HStack>
+
+				<HStack gap={3} vAlign="center" wrap="wrap">
+					<Button label="Info dialog" onclick={() => (dialogPurpose = 'info')} />
+					<Button label="Form dialog" onclick={() => (dialogPurpose = 'form')} />
+					<Button label="Required dialog" onclick={() => (dialogPurpose = 'required')} />
+				</HStack>
+
+				<HStack gap={3} vAlign="center" wrap="wrap">
+					<Button label="Show toast" onclick={() => showToast({ body: `Saved draft ${++toastCount}` })} />
+					<Button
+						label="Error toast"
+						variant="destructive"
+						onclick={() => showToast({ body: 'Could not reach the server.', type: 'error' })}
+					/>
+				</HStack>
+
+				<VStack gap={4}>
+					<TabList role="tablist" value={tab} onChange={(v) => (tab = v)} hasDivider aria-label="Project sections">
+						<Tab value="overview" label="Overview" panelId="panel-overview" />
+						<Tab value="activity" label="Activity" panelId="panel-activity" />
+						<Tab value="settings" label="Settings" icon="wrench" panelId="panel-settings" />
+						<Tab value="locked" label="Locked" isDisabled panelId="panel-locked" />
+					</TabList>
+					<div role="tabpanel" id="panel-{tab}"><Text>Panel: {tab}</Text></div>
+					<TabList value={navTab} onChange={(v) => (navTab = v)} size="sm" layout="fill" aria-label="Site">
+						<Tab value="home" label="Home" />
+						<Tab value="docs" label="Docs" />
+						<Tab value="blog" label="Blog" />
+					</TabList>
+				</VStack>
+			</VStack>
+		</div>
+	</section>
+
+	<Dialog isOpen={dialogPurpose != null} onOpenChange={(o) => !o && (dialogPurpose = null)} purpose={dialogPurpose ?? 'info'}>
+		<DialogHeader
+			title={dialogPurpose === 'required' ? 'Accept the new terms' : 'Rename project'}
+			subtitle="purpose = {dialogPurpose}"
+			onOpenChange={dialogPurpose === 'required' ? undefined : (o) => !o && (dialogPurpose = null)}
+		/>
+		{#if dialogPurpose === 'required'}
+			<Text>Escape and backdrop clicks are ignored. Use a button.</Text>
+		{:else}
+			<TextInput label="Project name" value="canon-svelte" labelTooltip="Shown in the sidebar and URLs." />
+		{/if}
+		<HStack gap={2} hAlign="end">
+			<Button label="Cancel" variant="ghost" onclick={() => (dialogPurpose = null)} />
+			<Button label="Confirm" variant="primary" onclick={() => (dialogPurpose = null)} />
+		</HStack>
+	</Dialog>
 </VStack>
 
 <style>
