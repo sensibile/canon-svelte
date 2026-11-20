@@ -32,13 +32,16 @@
 
 	let pauses = $state(new Set<string>());
 	let remaining = 0;
+	let timedDuration: number | undefined;
 	let startedAt = 0;
 	let timer: ReturnType<typeof setTimeout> | undefined;
 
 	$effect(() => {
-		remaining = autoHideDuration;
-	});
-	$effect(() => {
+		// A new duration (e.g. a uniqueID overwrite) restarts the countdown.
+		if (autoHideDuration !== timedDuration) {
+			timedDuration = autoHideDuration;
+			remaining = autoHideDuration;
+		}
 		if (!isAutoHide || isExiting || pauses.size > 0) return;
 		startedAt = Date.now();
 		timer = setTimeout(() => onDismiss('auto'), remaining);

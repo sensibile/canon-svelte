@@ -11,7 +11,11 @@ export const FOCUSABLE_SELECTOR = [
 
 export function focusables(root: HTMLElement): HTMLElement[] {
 	return Array.from(root.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
-		(el) => !el.closest('[inert]') && el.getAttribute('aria-disabled') !== 'true' && el.offsetParent !== null
+		(el) =>
+			el.tabIndex >= 0 &&
+			!el.closest('[inert]') &&
+			el.getAttribute('aria-disabled') !== 'true' &&
+			el.offsetParent !== null
 	);
 }
 

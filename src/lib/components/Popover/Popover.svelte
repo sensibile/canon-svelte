@@ -8,6 +8,7 @@
 	import { untrack, type Snippet } from 'svelte';
 	import Layer from '../Layer/Layer.svelte';
 	import { focusFirst, trapFocus } from '../../internal/focus.js';
+	import { pushLayer } from '../../internal/layerStack.js';
 	import type { LayerAlignment, LayerPlacement } from '../../internal/position.js';
 	import { cssSize, spacingVar, type SizeValue, type SpacingStep } from '../../types.js';
 
@@ -73,8 +74,9 @@
 	const open = $derived(isEnabled && (isOpen ?? internalOpen));
 	const autoFocus = $derived(hasAutoFocus ?? isModal);
 
-	const anchorEl = $derived(anchor ?? (wrapper?.firstElementChild as HTMLElement | null) ?? null);
 	let trigger = $state<HTMLElement | null>(null);
+	// Position against the button itself: a wrapping Tooltip span has no box of its own.
+	const anchorEl = $derived(anchor ?? trigger);
 	$effect(() => {
 		const root = anchor ?? wrapper;
 		if (!root) return;
@@ -136,6 +138,7 @@
 		let frame = 0;
 		if (autoFocus) frame = requestAnimationFrame(() => focusFirst(el));
 		const untrap = isModal ? trapFocus(el) : () => {};
+		const layer = pushLayer();
 		const onPointerDown = (e: PointerEvent) => {
 			if (!hasLightDismiss) return;
 			const t = e.target as Node;
@@ -143,7 +146,8 @@
 			setOpen(false);
 		};
 		const onKey = (e: KeyboardEvent) => {
-			if (e.key !== 'Escape' || !hasEscapeDismiss) return;
+			// Only the innermost open popover handles Escape.
+			if (e.key !== 'Escape' || !hasEscapeDismiss || !layer.isTop()) return;
 			e.preventDefault();
 			setOpen(false, true);
 		};
@@ -160,6 +164,7 @@
 		return () => {
 			cancelAnimationFrame(frame);
 			untrap();
+			layer.remove();
 			doc.removeEventListener('pointerdown', onPointerDown, true);
 			doc.removeEventListener('keydown', onKey);
 			el.removeEventListener('focusout', onFocusOut);

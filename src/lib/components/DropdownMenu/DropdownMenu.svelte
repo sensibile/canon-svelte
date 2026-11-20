@@ -102,6 +102,7 @@
 			setOpen(!untrack(() => open));
 		};
 		const onKey = (e: KeyboardEvent) => {
+			if (el.getAttribute('aria-disabled') === 'true') return;
 			if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
 				e.preventDefault();
 				focusOnOpen = e.key === 'ArrowDown' ? 'first' : 'last';
