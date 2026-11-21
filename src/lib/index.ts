@@ -187,3 +187,9 @@ export {
 	type DayOfWeekName,
 	type ISODateString
 } from './components/Calendar/Calendar.svelte';
+export {
+	default as DateInput,
+	type DateInputFormat,
+	type DateInputSize
+} from './components/DateInput/DateInput.svelte';
+export type { DateInputEntryError, EntryErrorBehavior } from './components/DateInput/typedDate.svelte.js';

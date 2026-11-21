@@ -1,5 +1,6 @@
-// Port of Astryx utils/plainDate.ts, MIT, Meta Platforms, Inc. Gregorian only: the calendar-system
-// branches are left out, as Timestamp does (pass `locale` instead of a provider).
+// Copied from @astryxdesign/core utils (MIT, Meta Platforms, Inc.). Adapted imports only.
+
+type Locale = string;
 
 /**
  * @file plainDate.ts
@@ -8,15 +9,17 @@
  * @position Shared utility; replaces scattered Date usage across Calendar hooks
  */
 
-import type { ISODateString, PlainDate } from './dateTypes.js';
-import { firstCharacter } from '../characters.js';
-
-type Locale = string;
-
-/** Languages whose stand-alone month names start with a capital (from Unicode CLDR 48.2.0). */
+import type {ISODateString, PlainDate} from './dateTypes.js';
+import {
+	formatCalendarDate,
+	isCalendarSystem,
+	type CalendarSystem,
+} from './calendarSystem.js';
+import {firstCharacter} from '../characters.js';
+/** Languages whose stand-alone month names start with a capital (Unicode CLDR 48.2.0). */
 const standaloneMonthCapitalLanguages: ReadonlySet<string> = new Set(['es', 'fr', 'it', 'nl', 'pl', 'ru', 'uk']);
 
-export type { PlainDate } from './dateTypes.js';
+export type {PlainDate} from './dateTypes.js';
 
 export function plainDateCreate(
 	year: number,
@@ -513,6 +516,10 @@ export function plainDateFormat(
 	options: Intl.DateTimeFormatOptions,
 	locale: Locale = 'en',
 ): string {
+	const calendar = options.calendar ?? 'gregory';
+	if (calendar !== 'gregory' && isCalendarSystem(calendar)) {
+		return formatCalendarDate(calendar, pd, options, locale);
+	}
 	const [format, date] = plainDateFormatInput(pd, options, locale);
 	return format.format(date);
 }
@@ -711,13 +718,14 @@ export function formatSharedDate(
 	pd: PlainDate,
 	format: SharedDateFormat,
 	locale: Locale = 'en',
+	calendar: CalendarSystem = 'gregory',
 ): string {
 	if (format === 'system_date') {
 		return plainDateToISO(pd);
 	}
 	return plainDateFormat(
 		pd,
-		SHARED_DATE_FORMAT_OPTIONS[format],
+		{...SHARED_DATE_FORMAT_OPTIONS[format], calendar},
 		locale,
 	);
 }
