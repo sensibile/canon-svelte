@@ -4,7 +4,7 @@
   Meta Platforms, Inc. `onChange(value, shouldSave)` stages a value, or with `shouldSave` applies it
   at once (a picked option, or Enter on a typed number). `onUnstage` withdraws a staged value the
   control no longer shows (a cleared date or time). The parent remounts this per field and operator.
-  Port changes: clearing a date or time unstages its value, typed numbers stage as they change,
+  Port changes: clearing a date or time, or text it rejects, unstages its value, typed numbers stage as they change,
   `isArbitraryStringAllowed` stages a suggestion field's typed text, a stepped number replaces the typed
   text Enter would apply, and a range's end is stored as the last second of its end day.
   Not yet ported: the bottom-sheet presentation (its full-width controls and inline range calendar).
@@ -125,6 +125,12 @@
 		else onUnstage?.();
 	}
 
+	// Port change: text a date or time field rejects withdraws the staged value, so Apply can't save
+	// the value the field no longer shows.
+	function onEntryError(error: unknown) {
+		if (error != null) onUnstage?.();
+	}
+
 	// Date and time: the parts picked before both are known.
 	let pendingDate: ISODateString | undefined = $state();
 	let pendingTime: ISOTimeString | undefined = $state();
@@ -205,6 +211,7 @@
 		label={strings.valueEditor.time}
 		isLabelHidden
 		entryErrorBehavior="complete"
+		onEntryErrorChange={onEntryError}
 		{isDisabled}
 		value={filterValue?.type === 'time' ? filterValue.value : undefined}
 		onChange={(value) => (value != null ? onChange({ type: 'time', value }) : onUnstage?.())}
@@ -232,6 +239,7 @@
 				label={strings.valueEditor.date}
 				isLabelHidden
 				entryErrorBehavior="complete"
+				onEntryErrorChange={onEntryError}
 				{isDisabled}
 				value={date}
 				onChange={(value) => {
@@ -244,6 +252,7 @@
 				label={strings.valueEditor.time}
 				isLabelHidden
 				entryErrorBehavior="complete"
+				onEntryErrorChange={onEntryError}
 				{isDisabled}
 				value={time}
 				onChange={(value) => {
@@ -259,6 +268,7 @@
 			label={strings.valueEditor.date}
 			isLabelHidden
 			entryErrorBehavior="complete"
+			onEntryErrorChange={onEntryError}
 			{isDisabled}
 			value={unixSeconds == null ? undefined : unixSecondsToISODate(unixSeconds, zone)}
 			onChange={(value) => {
