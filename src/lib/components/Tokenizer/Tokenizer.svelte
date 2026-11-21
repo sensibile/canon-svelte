@@ -283,6 +283,14 @@
 				e.preventDefault();
 				if (n) search.highlightedIndex = i > 0 ? i - 1 : n - 1;
 				return;
+			case 'Home':
+				e.preventDefault();
+				if (n) search.highlightedIndex = 0;
+				return;
+			case 'End':
+				e.preventDefault();
+				if (n) search.highlightedIndex = n - 1;
+				return;
 			case 'Enter':
 				e.preventDefault();
 				if (results[i]) add(results[i]);
