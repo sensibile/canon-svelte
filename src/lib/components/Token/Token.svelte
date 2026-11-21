@@ -61,6 +61,7 @@
 		'aria-haspopup': ariaHasPopup,
 		'aria-expanded': ariaExpanded,
 		'aria-pressed': ariaPressed,
+		'aria-label': ariaLabel,
 		...rest
 	}: Props = $props();
 
@@ -73,8 +74,10 @@
 		'aria-expanded': ariaExpanded,
 		'aria-pressed': ariaPressed
 	});
+	// Naming and description go on whichever element is the control (the inner link/button when
+	// the chip is a wrapper), so assistive tech reads them on the focused element.
 	const shared = $derived({
-		...(isLabelHidden ? { 'aria-label': label } : {}),
+		...(ariaLabel != null ? { 'aria-label': ariaLabel } : isLabelHidden ? { 'aria-label': label } : {}),
 		...(description != null ? { 'aria-description': description } : {})
 	});
 	const classes = $derived(['astryx-token', 'token', className]);
@@ -142,7 +145,6 @@
 	<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
 	<span
 		{...rest}
-		{...shared}
 		class={classes}
 		class:interactive={true}
 		class:disabled={isDisabled}
@@ -157,6 +159,7 @@
 			<a
 				bind:this={labelEl}
 				{...labelling}
+				{...shared}
 				href={isDisabled ? undefined : href}
 				role={isDisabled ? 'link' : undefined}
 				tabindex={isDisabled ? 0 : undefined}
@@ -170,6 +173,7 @@
 				bind:this={labelEl}
 				type="button"
 				{...labelling}
+				{...shared}
 				aria-disabled={isDisabled || undefined}
 				onkeydown={isDisabled ? blockDisabled : undefined}
 				onclick={(e) => {

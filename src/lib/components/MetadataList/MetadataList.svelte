@@ -128,10 +128,18 @@
 			gap: var(--spacing-2) var(--spacing-4);
 			align-items: baseline;
 		}
-		.list:is([data-layout='multi'], [data-layout='stacked-multi']) {
+		.list[data-layout='stacked-multi'] {
 			display: grid;
 			grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
 			gap: var(--spacing-4);
+		}
+		/* Inline labels: each item is a label track plus a value track, so tracks repeat in pairs and
+		   a label never wraps away from its value. The pair is about as wide as a stacked column. */
+		.list[data-layout='multi'] {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(80px, max-content) minmax(184px, 1fr));
+			gap: var(--spacing-2) var(--spacing-4);
+			align-items: baseline;
 		}
 		.list[data-layout='stacked-single'] { display: grid; grid-template-columns: 1fr; gap: var(--spacing-3); }
 		.list[data-layout='horizontal'] { display: flex; flex-direction: row; flex-wrap: wrap; gap: var(--spacing-4); }

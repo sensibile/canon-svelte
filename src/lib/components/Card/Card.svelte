@@ -79,6 +79,9 @@
 <style>
 	@layer astryx-base {
 		.card {
+			/* Each Card starts without an override, so an outer Card's `padding` doesn't leak in;
+			   the inline style from the `padding` prop wins over this. */
+			--_card-padding: initial;
 			--_card-radius: var(--radius-container);
 			--_pad: var(--_card-padding, var(--astryx-card-padding, var(--spacing-4)));
 			--_pad-inline: var(--_card-padding, var(--astryx-card-padding-inline, var(--_pad)));

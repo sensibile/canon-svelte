@@ -6,6 +6,7 @@
   non-Gregorian calendars and the locale context (pass `locale` instead).
 -->
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import type { HTMLTimeAttributes } from 'svelte/elements';
 	import Text from '../Text/Text.svelte';
 	import Tooltip from '../Tooltip/Tooltip.svelte';
@@ -23,7 +24,11 @@
 	} from './format.js';
 
 	interface Props extends Omit<HTMLTimeAttributes, 'color'> {
-		/** ISO string, or a Unix timestamp in seconds or milliseconds. */
+		/**
+		 * ISO string, or a Unix timestamp. Like Astryx, numbers below 1e12 are read as seconds and
+		 * larger ones as milliseconds, so pass millisecond values before Sept 2001 as an ISO string
+		 * or a seconds value.
+		 */
 		value: string | number;
 		format?: TimestampFormat;
 		/** IANA zone for absolute formats; defaults to the viewer's zone. */
@@ -70,8 +75,11 @@
 
 	// The clock is read on the client only, so server and hydration render the same UTC fallback.
 	let now = $state<Date | null>(null);
+	// Read the clock on mount and again whenever a new value arrives, so a new value is never
+	// measured against a stale baseline (with or without live updates).
 	$effect(() => {
-		if (needsClock && now === null) now = new Date();
+		void value;
+		if (needsClock) untrack(() => (now = new Date()));
 	});
 
 	const date = $derived(typeof value === 'number' ? new Date(value < 1e12 ? value * 1000 : value) : new Date(value));

@@ -48,16 +48,20 @@
 	const isLink = $derived(href != null);
 	const INTERACTIVE = 'a[href], button, input, select, textarea, summary, label, [role="button"], [role="link"], [tabindex]';
 
-	function isNestedControl(target: EventTarget | null): boolean {
-		const el = target instanceof Element ? target.closest(INTERACTIVE) : null;
-		return el != null && el !== control;
+	/** True when the press landed on a control inside the card (not the card itself or an ancestor). */
+	function isNestedControl(target: EventTarget | null, root: EventTarget | null): boolean {
+		if (!(root instanceof Element)) return false;
+		for (let el = target instanceof Element ? target : null; el && el !== root; el = el.parentElement) {
+			if (el.matches(INTERACTIVE)) return el !== control;
+		}
+		return false;
 	}
 	function isSelectingText(): boolean {
 		const sel = window.getSelection();
 		return sel != null && !sel.isCollapsed && sel.toString().trim() !== '';
 	}
 	function onContainerClick(e: MouseEvent) {
-		if (isDisabled || !control || e.target === control || isNestedControl(e.target) || isSelectingText()) return;
+		if (isDisabled || !control || e.target === control || isNestedControl(e.target, e.currentTarget) || isSelectingText()) return;
 		// Re-dispatch on the real control so modifier keys keep their meaning (new tab etc.).
 		control.dispatchEvent(
 			new MouseEvent('click', {
@@ -72,7 +76,7 @@
 		);
 	}
 	function onAuxClick(e: MouseEvent) {
-		if (e.button !== 1 || isDisabled || !isLink || isNestedControl(e.target) || !href) return;
+		if (e.button !== 1 || isDisabled || !isLink || isNestedControl(e.target, e.currentTarget) || !href) return;
 		e.preventDefault();
 		window.open(href, '_blank', 'noopener');
 	}
