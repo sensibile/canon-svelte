@@ -178,3 +178,38 @@ export { default as Typeahead, type TypeaheadSize } from './components/Typeahead
 export { default as TypeaheadItem } from './components/Typeahead/TypeaheadItem.svelte';
 export { createStaticSource, type CreateStaticSourceOptions } from './components/Typeahead/createStaticSource.js';
 export type { SearchableItem, SearchContext, SearchSource } from './components/Typeahead/types.js';
+export {
+	default as Calendar,
+	type CalendarMode,
+	type CalendarValue,
+	type DateRange,
+	type DayOfWeek,
+	type DayOfWeekName,
+	type ISODateString
+} from './components/Calendar/Calendar.svelte';
+export {
+	default as DateInput,
+	type DateInputFormat,
+	type DateInputSize
+} from './components/DateInput/DateInput.svelte';
+export type { DateInputEntryError, EntryErrorBehavior } from './components/DateInput/typedDate.svelte.js';
+export {
+	default as DateRangeInput,
+	type DateRangeInputSize,
+	type DateRangePreset
+} from './components/DateRangeInput/DateRangeInput.svelte';
+export {
+	default as TimeInput,
+	type TimeInputHourFormat,
+	type TimeInputSize
+} from './components/TimeInput/TimeInput.svelte';
+export type { TimeInputEntryError } from './components/TimeInput/typedTime.svelte.js';
+export type { ISOTimeString } from './internal/date/timeParser.js';
+export {
+	default as DateTimeInput,
+	type DateTimeInputHourFormat,
+	type DateTimeInputSize,
+	type DateTimeInputTimeIncrement,
+	type DateTimeInputTimeOptionInterval,
+	type ISODateTimeString
+} from './components/DateTimeInput/DateTimeInput.svelte';
