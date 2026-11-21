@@ -240,6 +240,16 @@
 		emitEnd();
 	}
 
+	/** The `count`-th grid point from `current` in `direction`, so an off-grid value (such as a
+	 * max that isn't a whole number of steps from min) steps to its neighbour, not past it. */
+	function gridStep(current: number, direction: 1 | -1, count: number): number {
+		if (step <= 0) return current + direction * count;
+		const position = (current - min) / step;
+		const tolerance = Number.EPSILON * Math.max(1, Math.abs(position)) * 4;
+		const base = direction === 1 ? Math.floor(position + tolerance) : Math.ceil(position - tolerance);
+		return min + (base + direction * count) * step;
+	}
+
 	function onThumbKeydown(index: number, e: KeyboardEvent) {
 		if (isDisabled) return;
 		const current = values[index];
@@ -250,17 +260,17 @@
 		switch (e.key) {
 			case towardMax:
 			case 'ArrowUp':
-				next = current + step;
+				next = gridStep(current, 1, 1);
 				break;
 			case towardMin:
 			case 'ArrowDown':
-				next = current - step;
+				next = gridStep(current, -1, 1);
 				break;
 			case 'PageUp':
-				next = current + step * 10;
+				next = gridStep(current, 1, 10);
 				break;
 			case 'PageDown':
-				next = current - step * 10;
+				next = gridStep(current, -1, 10);
 				break;
 			case 'Home':
 				next = min;

@@ -165,12 +165,18 @@
 		requestAnimationFrame(() => tokenWrap?.querySelector<HTMLElement>('button, [tabindex]')?.focus());
 	}
 
+	/** Empties the query and tells the owner, so a controlled query never drifts. */
+	function resetQuery() {
+		if (query === '') return;
+		query = '';
+		onChangeQuery?.('');
+	}
+
 	function pick(item: T) {
 		if (isDisabled) return;
 		search.reset();
 		isEditing = false;
-		if (query !== '') onChangeQuery?.('');
-		query = '';
+		resetQuery();
 		value = item;
 		onChange?.(item);
 		focusToken();
@@ -178,7 +184,7 @@
 
 	function clear() {
 		search.reset();
-		query = '';
+		resetQuery();
 		isEditing = false;
 		value = null;
 		onChange?.(null);
@@ -229,7 +235,7 @@
 					// Leave edit mode and return to the picked item.
 					e.preventDefault();
 					isEditing = false;
-					query = '';
+					resetQuery();
 					focusToken();
 				}
 				return;
@@ -262,7 +268,7 @@
 		search.reset();
 		if (isEditing) {
 			isEditing = false;
-			query = '';
+			resetQuery();
 		}
 	}
 
