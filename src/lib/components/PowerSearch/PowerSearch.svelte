@@ -9,7 +9,7 @@
   `focusTypeahead()` and `blurTypeahead()` move focus to and from the field (bind:this).
   `onFocus` and `onBlur` fire as focus enters and leaves the field.
   Port changes (marked "Port change"): a read-only field takes no new filters, and each opening
-  of the editor starts from the new pick.
+  of the editor starts from the new pick, and an editor whose filter moves or goes away closes.
   Not yet ported: the bottom-sheet presentation on touch, token overflow behaviors, the nested
   (group) editor, group headings in the results, translations (English only).
 -->
@@ -179,8 +179,11 @@
 	let showFrame = 0;
 	// Port change: each opening remounts the editor, so a new pick replaces any draft in it.
 	let popoverSeq = 0;
+	// The filter an open editor was opened on; the editor closes if it moves or goes away.
+	let editingTarget: PowerSearchFilter | undefined;
 	function setPopoverState(state: PopoverState) {
 		if (state.type !== 'idle') popoverSeq++;
+		editingTarget = state.type === 'editing' ? filters[state.filterIndex] : undefined;
 		popoverState = state;
 		cancelAnimationFrame(showFrame);
 		if (state.type !== 'idle') {
@@ -300,6 +303,17 @@
 	function handlePopoverCancel() {
 		setPopoverState({ type: 'idle' });
 	}
+
+	// Port change: removing tokens (or any change to `filters`) can shift the edited filter's index;
+	// close the editor rather than apply or delete at a stale index.
+	$effect(() => {
+		const state = popoverState;
+		if (state.type !== 'editing') return;
+		if (filters[state.filterIndex] === editingTarget) return;
+		cancelAnimationFrame(showFrame);
+		isPopoverShown = false;
+		popoverState = { type: 'idle' };
+	});
 
 	// Light dismiss: a press outside the popover and the field closes it without moving focus;
 	// Escape cancels it and returns focus to the field.

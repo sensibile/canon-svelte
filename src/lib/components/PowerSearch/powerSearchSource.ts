@@ -164,6 +164,10 @@ interface ValueMatch {
 }
 function resolveValueMatches(op: PowerSearchOperator, rawValue: string): ValueMatch[] {
 	const opType = op.value.type;
+	// Port change: a typed value is offered only where the operator takes free text.
+	if ((opType === 'string' || opType === 'string_list') && op.value.searchSource && !op.value.isArbitraryStringAllowed) {
+		return [];
+	}
 	if (opType === 'string') {
 		return [
 			{

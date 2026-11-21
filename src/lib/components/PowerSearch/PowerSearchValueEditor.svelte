@@ -115,6 +115,16 @@
 		if (e.key === 'Enter') e.stopPropagation();
 	}
 
+	// A suggestion field shows its picked item; typed arbitrary text stages without becoming one.
+	// svelte-ignore state_referenced_locally
+	const initialString = filterValue?.type === 'string' ? filterValue.value : '';
+	let pickedItem: SearchableItem | null = $state(initialString ? { id: initialString, label: initialString } : null);
+	function onArbitraryInput(e: Event) {
+		const text = (e.target as HTMLInputElement).value;
+		if (text.trim()) onChange({ type: 'string', value: text });
+		else onUnstage?.();
+	}
+
 	// Date and time: the parts picked before both are known.
 	let pendingDate: ISODateString | undefined = $state();
 	let pendingTime: ISOTimeString | undefined = $state();
@@ -123,23 +133,26 @@
 {#if operatorValue.type === 'string'}
 	{@const currentValue = filterValue?.type === 'string' ? filterValue.value : ''}
 	{#if operatorValue.searchSource}
-		<Typeahead
-			label={strings.valueEditor.value}
-			isLabelHidden
-			{isDisabled}
-			searchSource={operatorValue.searchSource}
-			value={currentValue ? { id: currentValue, label: currentValue } : null}
-			onChange={(item) => {
-				if (item) onChange({ type: 'string', value: item.label }, true);
-				else onChange({ type: 'string', value: '' });
-			}}
-			placeholder={strings.valueEditor.searchPlaceholder}
-			onChangeQuery={operatorValue.isArbitraryStringAllowed
-				? (query) => (query.trim() ? onChange({ type: 'string', value: query }) : onUnstage?.())
-				: undefined}
-			debounceMs={150}
-			{maxMenuItems}
-		/>
+		<!-- Port change: with isArbitraryStringAllowed, typed text stages as typed (read from input
+		     events, so the field's own query resets on blur don't withdraw it). -->
+		<div class="cell" oninput={operatorValue.isArbitraryStringAllowed ? onArbitraryInput : undefined}>
+			<Typeahead
+				label={strings.valueEditor.value}
+				isLabelHidden
+				{isDisabled}
+				searchSource={operatorValue.searchSource}
+				value={pickedItem}
+				onChange={(item) => {
+					pickedItem = item;
+					// Port change: a cleared pick withdraws the staged value.
+					if (item) onChange({ type: 'string', value: item.label }, true);
+					else onUnstage?.();
+				}}
+				placeholder={strings.valueEditor.searchPlaceholder}
+				debounceMs={150}
+				{maxMenuItems}
+			/>
+		</div>
 	{:else}
 		<TextInput
 			label={strings.valueEditor.value}

@@ -3,6 +3,8 @@
   `PowerSearchEditPopover` (packages/core/src/PowerSearch/PowerSearchEditPopover.tsx), MIT,
   Meta Platforms, Inc. Enter applies a complete filter (outside buttons and controls that claim
   Enter); Escape is the popover's. An operator that takes no value applies as soon as it is picked.
+  Port change: switching operators keeps the value only when the new operator's options and bounds
+  accept it.
   Not yet ported: the nested (group) editor, which needs TreeList; a nested filter shows its field
   and operator only.
 -->
@@ -13,7 +15,7 @@
 	import { resolveOperatorLabel } from './resolveOperatorLabel.js';
 	import { strings } from './strings.js';
 	import type { InternalConfig } from './internalConfig.js';
-	import type { FilterValue, PartialFilter, PowerSearchFilter, PowerSearchOperator } from './types.js';
+	import type { FilterValue, OperatorValue, PartialFilter, PowerSearchFilter, PowerSearchOperator } from './types.js';
 	import type { HTMLAttributes } from 'svelte/elements';
 
 	interface Props extends HTMLAttributes<HTMLDivElement> {
@@ -77,11 +79,27 @@
 		if (changed) saveIfEmptyOperator(fieldKey, defaultOp);
 	}
 
+	/** Whether an operator's options and bounds allow a value carried over from another operator. */
+	function acceptsValue(operatorValue: OperatorValue, value: FilterValue | undefined): boolean {
+		if (value == null) return true;
+		if (operatorValue.type === 'enum' && value.type === 'enum')
+			return operatorValue.values.some((item) => item.value === value.value);
+		if (operatorValue.type === 'enum_list' && value.type === 'enum_list')
+			return value.value.every((v) => operatorValue.values.some((item) => item.value === v));
+		if ((operatorValue.type === 'integer' || operatorValue.type === 'float') && (value.type === 'integer' || value.type === 'float')) {
+			if (operatorValue.minValue != null && value.value < operatorValue.minValue) return false;
+			if (operatorValue.maxValue != null && value.value > operatorValue.maxValue) return false;
+		}
+		return true;
+	}
+
 	function handleOperatorChange(operatorKey: string | null) {
 		if (operatorKey == null) return;
 		const newOp = config.getOperator(partialFilter.field, operatorKey);
 		const oldOp = currentOperator;
-		const keepValue = newOp && oldOp && newOp.value.type === oldOp.value.type;
+		// Port change: a value is kept only when the new operator accepts it too.
+		const keepValue =
+			newOp && oldOp && newOp.value.type === oldOp.value.type && acceptsValue(newOp.value, partialFilter.value);
 		const changed = operatorKey !== partialFilter.operator;
 		partialFilter = { ...partialFilter, operator: operatorKey, value: keepValue ? partialFilter.value : undefined };
 		if (changed) saveIfEmptyOperator(partialFilter.field, newOp);
