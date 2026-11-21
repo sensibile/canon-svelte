@@ -380,7 +380,7 @@
 	{@const Editor = operatorValue.Editor}
 	<Editor
 		{isDisabled}
-		onChange={(value) => (value != null ? onChange({ type: 'custom', value }) : onUnstage())}
+		onChange={(value) => (value != null ? onChange({ type: 'custom', value }) : onUnstage?.())}
 		placeholder={strings.valueEditor.enterValuePlaceholder}
 		value={filterValue?.type === 'custom' ? filterValue.value : null}
 	/>
