@@ -174,7 +174,8 @@
 		if (!hasCreate || trimmed === '' || search.isPending) return null;
 		const wanted = trimmed.toLowerCase();
 		if (selectedIds.has(trimmed) || selectedLabels.has(wanted)) return null;
-		if (search.results.some((i) => i.label.toLowerCase() === wanted)) return null;
+		// Check past the display cap, so an exact match that isn't shown still blocks creation.
+		if (search.allResults.some((i) => i.label.toLowerCase() === wanted)) return null;
 		return { id: `${CREATE_PREFIX}${trimmed}`, label: `Create "${trimmed}"` } as T;
 	});
 	const results = $derived(createEntry ? [...search.results, createEntry] : search.results);

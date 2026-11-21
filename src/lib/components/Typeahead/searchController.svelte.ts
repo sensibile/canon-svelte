@@ -22,6 +22,8 @@ export function isBelowMinQueryLength(query: string, minQueryLength: number): bo
 
 export class SearchController<T extends SearchableItem> {
 	results = $state<T[]>([]);
+	/** Every offerable item in the last answer, before the `maxMenuItems` cap. */
+	allResults = $state<T[]>([]);
 	isLoading = $state(false);
 	/** True once a search for the current query has answered, so "no results" can show. */
 	hasSearched = $state(false);
@@ -53,8 +55,10 @@ export class SearchController<T extends SearchableItem> {
 	#apply(list: T[], gen: number, query: string, isFinal: boolean) {
 		if (gen !== this.#gen) return;
 		const { maxMenuItems, exclude, announce } = this.#options();
-		const shown = (exclude ? list.filter((i) => !exclude(i)) : list).slice(0, maxMenuItems);
+		const offerable = exclude ? list.filter((i) => !exclude(i)) : list;
+		const shown = offerable.slice(0, maxMenuItems);
 		const previous = this.results;
+		this.allResults = offerable;
 		this.results = shown;
 		// Keep the highlight on the same item across streamed updates; else start at the top.
 		const keptId = previous[this.highlightedIndex]?.id;
@@ -98,6 +102,7 @@ export class SearchController<T extends SearchableItem> {
 		this.#cancelPending();
 		if ((query === '' && !hasEntriesOnFocus) || isBelowMinQueryLength(query, minQueryLength)) {
 			this.results = [];
+			this.allResults = [];
 			this.highlightedIndex = -1;
 			this.hasSearched = false;
 			this.isLoading = false;
@@ -138,6 +143,7 @@ export class SearchController<T extends SearchableItem> {
 	/** Closes and forgets results, e.g. after a pick. */
 	reset() {
 		this.results = [];
+		this.allResults = [];
 		this.hasSearched = false;
 		this.close();
 	}

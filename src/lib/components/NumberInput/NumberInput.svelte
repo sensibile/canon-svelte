@@ -278,7 +278,9 @@
 		isDraftKeptAtBlur = false;
 		reportEntryError(null);
 		const decision = resolveNumberInputCommit(pendingInput, { ...rules, hasClear });
-		if (trigger === 'blur' || (decision.type === 'commit' && decision.didClamp)) pendingInput = null;
+		if (trigger === 'blur' || decision.type === 'revert' || (decision.type === 'commit' && decision.didClamp)) {
+			pendingInput = null;
+		}
 		if (decision.type === 'clear') {
 			if (hasClear && value != null) emit(null);
 		} else if (decision.type === 'commit' && decision.value !== value) {
