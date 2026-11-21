@@ -35,7 +35,10 @@ Ported so far (props follow Astryx; see each file's header for what isn't ported
 - Action: `Button`, `IconButton`, `Link`, `ClickableCard`
 - Layout: `Stack`, `HStack`, `VStack`, `Divider`, `AspectRatio`, `Card`, `Center`, `Collapsible`
   (`CollapsibleGroup`), `Grid` (`GridSpan`), `Section`
-- Form: `Field`, `FieldLabel`, `FieldStatus`, `TextInput`, `CheckboxInput`, `Switch`
+- Form: `Field`, `FieldLabel`, `FieldStatus`, `TextInput`, `TextArea`, `NumberInput`, `CheckboxInput`, `Switch`,
+  `RadioList` (`RadioListItem`), `CheckboxList` (`CheckboxListItem`), `InputGroup` (`InputGroupText`),
+  `FileInput`, `Slider`, `Item`, `CheckboxIndicator`, `RadioIndicator`, `Selector`, `MultiSelector`,
+  `Typeahead` (`TypeaheadItem`, `createStaticSource`), `Tokenizer`
 - Overlay: `Tooltip`, `InfoTip`, `Popover`, `Dialog`, `DialogHeader`, `DropdownMenu`
   (`DropdownMenuItem`, `DropdownMenuGroup`, `DropdownMenuDivider`), `Toast` (`showToast`, `ToastViewport`)
 - Navigation: `TabList`, `Tab`

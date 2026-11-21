@@ -31,6 +31,7 @@
 		type IconName
 	} from '#lib';
 	import LayoutContentDemos from './LayoutContentDemos.svelte';
+	import FormDemos from './FormDemos.svelte';
 
 	let name = $state('');
 	let email = $state('not-an-email');
@@ -262,6 +263,8 @@
 	</section>
 
 	<LayoutContentDemos />
+
+	<FormDemos />
 
 	<Dialog isOpen={dialogPurpose != null} onOpenChange={(o) => !o && (dialogPurpose = null)} purpose={dialogPurpose ?? 'info'}>
 		<DialogHeader

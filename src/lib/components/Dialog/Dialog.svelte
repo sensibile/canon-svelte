@@ -16,6 +16,7 @@
 	import { cssSize, spacingVar, type SizeValue, type SpacingStep } from '../../types.js';
 	import { focusFirst } from '../../internal/focus.js';
 	import { setDialogContext } from './context.js';
+	import { setInputGroupContext } from '../InputGroup/context.js';
 	import { pushLayer } from '../../internal/layerStack.js';
 	import { lockScroll } from '../../internal/scrollLock.js';
 
@@ -43,6 +44,8 @@
 		children,
 		...rest
 	}: Props = $props();
+	// Overlay content is not part of an enclosing InputGroup.
+	setInputGroupContext(null);
 
 	const uid = $props.id();
 	const titleId = `${uid}-title`;

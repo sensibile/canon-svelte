@@ -1,6 +1,6 @@
 <!--
   Port of Astryx `Button` (packages/core/src/Button/Button.tsx), MIT, Meta Platforms, Inc.
-  Not yet ported: ButtonGroup/InputGroup integration,
+  Not yet ported: ButtonGroup integration,
   touch press feedback and hit-area expansion.
 -->
 <script lang="ts" module>
@@ -19,6 +19,7 @@
 	import Spinner from '../Spinner/Spinner.svelte';
 	import VisuallyHidden from '../VisuallyHidden/VisuallyHidden.svelte';
 	import { cssSize, type SizeValue } from '../../types.js';
+	import { getInputGroupContext, INPUT_GROUP_ITEM } from '../InputGroup/context.js';
 
 	interface Props extends Omit<HTMLButtonAttributes, 'type' | 'disabled'> {
 		/** Visible text, and the accessible name when the button is icon-only or loading. */
@@ -54,7 +55,7 @@
 		size = 'md',
 		elevation = 'none',
 		type = 'button',
-		isDisabled = false,
+		isDisabled: isDisabledProp = false,
 		isLoading = false,
 		isInterruptible = false,
 		clickAction,
@@ -73,6 +74,9 @@
 		onkeydown,
 		...rest
 	}: Props = $props();
+
+	const inputGroup = getInputGroupContext();
+	const isDisabled = $derived(isDisabledProp || (inputGroup?.isDisabled ?? false));
 
 	const iconSizeByButtonSize: Record<ButtonSize, IconSize> = { sm: 'sm', md: 'sm', lg: 'md' };
 	const iconSize = $derived(iconSizeByButtonSize[size]);
@@ -127,6 +131,7 @@
 		'data-variant': variant,
 		'data-size': size,
 		'data-elevation': elevation,
+		[INPUT_GROUP_ITEM]: inputGroup ? '' : undefined,
 		'aria-label': needsAriaLabel ? label : rest['aria-label'],
 		'aria-busy': isLoadingState || undefined,
 		'aria-disabled': inactive || undefined,
