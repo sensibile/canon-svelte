@@ -8,6 +8,8 @@
   `createPowerSearchConfig(definitions)` builds a config, and an `applyFilters`, from typed fields.
   `focusTypeahead()` and `blurTypeahead()` move focus to and from the field (bind:this).
   `onFocus` and `onBlur` fire as focus enters and leaves the field.
+  Port changes (marked "Port change"): a read-only field takes no new filters, and each opening
+  of the editor starts from the new pick.
   Not yet ported: the bottom-sheet presentation on touch, token overflow behaviors, the nested
   (group) editor, group headings in the results, translations (English only).
 -->
@@ -175,7 +177,10 @@
 	);
 
 	let showFrame = 0;
+	// Port change: each opening remounts the editor, so a new pick replaces any draft in it.
+	let popoverSeq = 0;
 	function setPopoverState(state: PopoverState) {
+		if (state.type !== 'idle') popoverSeq++;
 		popoverState = state;
 		cancelAnimationFrame(showFrame);
 		if (state.type !== 'idle') {
@@ -328,8 +333,8 @@
 	const popoverPartialFilter = $derived(popoverState.type !== 'idle' ? popoverState.partialFilter : null);
 	const popoverKey = $derived(
 		popoverState.type === 'editing'
-			? `edit-${popoverState.filterIndex}-${popoverPartialFilter?.field}`
-			: `add-${popoverPartialFilter?.field}`
+			? `edit-${popoverState.filterIndex}-${popoverPartialFilter?.field}-${popoverSeq}`
+			: `add-${popoverPartialFilter?.field}-${popoverSeq}`
 	);
 	const EditorOverride = $derived.by(() => {
 		if (!popoverPartialFilter?.field || !popoverPartialFilter.operator) return undefined;

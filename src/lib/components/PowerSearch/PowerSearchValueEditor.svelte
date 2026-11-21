@@ -4,10 +4,10 @@
   Meta Platforms, Inc. `onChange(value, shouldSave)` stages a value, or with `shouldSave` applies it
   at once (a picked option, or Enter on a typed number). `onUnstage` withdraws a staged value the
   control no longer shows (a cleared date or time). The parent remounts this per field and operator.
-  Port changes: clearing a date or time unstages its value, a stepped number replaces the typed
+  Port changes: clearing a date or time unstages its value, typed numbers stage as they change,
+  `isArbitraryStringAllowed` stages a suggestion field's typed text, a stepped number replaces the typed
   text Enter would apply, and a range's end is stored as the last second of its end day.
-  Not yet ported: the bottom-sheet presentation (its full-width controls, inline range calendar and
-  staging numbers as typed).
+  Not yet ported: the bottom-sheet presentation (its full-width controls and inline range calendar).
 -->
 <script lang="ts" module>
 	import { strings } from './strings.js';
@@ -97,6 +97,10 @@
 			locale,
 			hasClear: false
 		});
+		// Port change: the typed text stages as it changes, so Apply never saves a number the
+		// field no longer shows; text that can't commit withdraws the staged number.
+		if (pendingDecision.type === 'commit') onChange(toNumberValue(pendingDecision.value));
+		else onUnstage?.();
 	}
 	function toNumberValue(value: number): FilterValue {
 		return operatorValue.type === 'integer' ? { type: 'integer', value } : { type: 'float', value };
@@ -130,6 +134,9 @@
 				else onChange({ type: 'string', value: '' });
 			}}
 			placeholder={strings.valueEditor.searchPlaceholder}
+			onChangeQuery={operatorValue.isArbitraryStringAllowed
+				? (query) => (query.trim() ? onChange({ type: 'string', value: query }) : onUnstage?.())
+				: undefined}
 			debounceMs={150}
 			{maxMenuItems}
 		/>
