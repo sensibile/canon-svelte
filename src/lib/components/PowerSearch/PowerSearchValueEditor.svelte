@@ -2,8 +2,10 @@
   Internal: the value control of a PowerSearch filter, chosen by the operator's value type. Port of
   Astryx `PowerSearchValueEditor` (packages/core/src/PowerSearch/PowerSearchValueEditor.tsx), MIT,
   Meta Platforms, Inc. `onChange(value, shouldSave)` stages a value, or with `shouldSave` applies it
-  at once (a picked option, or Enter on a typed number). The parent remounts this per field and
-  operator.
+  at once (a picked option, or Enter on a typed number). `onUnstage` withdraws a staged value the
+  control no longer shows (a cleared date or time). The parent remounts this per field and operator.
+  Port changes: clearing a date or time unstages its value, a stepped number replaces the typed
+  text Enter would apply, and a range's end is stored as the last second of its end day.
   Not yet ported: the bottom-sheet presentation (its full-width controls, inline range calendar and
   staging numbers as typed).
 -->
@@ -54,6 +56,7 @@
 		unixSecondsToISODateTime
 	} from './powerSearchDateZone.js';
 	import { resolveDateTimeRangePart } from './resolveDateTimeRangePart.js';
+	import { plainDateAddDays, plainDateFromISO, plainDateToISO } from '../../internal/date/plainDate.js';
 	import type { FilterValue, OperatorValue } from './types.js';
 
 	interface Props {
@@ -62,13 +65,15 @@
 		onChange: (value: FilterValue, shouldSave?: boolean) => void;
 		/** Enter in a number field with no new text: apply the staged filter. */
 		onEnter?: () => void;
+		/** The control was cleared: withdraw the staged value. */
+		onUnstage?: () => void;
 		maxMenuItems?: number;
 		isDisabled?: boolean;
 		timezoneID?: string;
 		locale?: string;
 	}
 
-	let { operatorValue, filterValue, onChange, onEnter, maxMenuItems, isDisabled, timezoneID, locale = 'en-US' }: Props =
+	let { operatorValue, filterValue, onChange, onEnter, onUnstage, maxMenuItems, isDisabled, timezoneID, locale = 'en-US' }: Props =
 		$props();
 
 	const EMPTY_SOURCE: SearchSource<SearchableItem> = { search: () => [], bootstrap: () => [] };
@@ -159,7 +164,12 @@
 			isLabelHidden
 			{isDisabled}
 			value={currentValue}
-			onChange={(value) => value != null && onChange(toNumberValue(value))}
+			onChange={(value) => {
+				// Port change: a committed or stepped number supersedes the typed text, so Enter
+				// applies the number shown.
+				pendingDecision = null;
+				if (value != null) onChange(toNumberValue(value));
+			}}
 			onEnter={onNumberEnter}
 			onkeydown={stopEnter}
 			min={operatorValue.minValue}
@@ -177,7 +187,7 @@
 		entryErrorBehavior="complete"
 		{isDisabled}
 		value={filterValue?.type === 'time' ? filterValue.value : undefined}
-		onChange={(value) => value != null && onChange({ type: 'time', value })}
+		onChange={(value) => (value != null ? onChange({ type: 'time', value }) : onUnstage?.())}
 		min={operatorValue.minValue}
 		max={operatorValue.maxValue}
 		{locale}
@@ -190,7 +200,8 @@
 		{@const date = (parts[0] as ISODateString | undefined) ?? pendingDate}
 		{@const time = (parts[1] as ISOTimeString | undefined) ?? pendingTime}
 		{@const commit = (nextDate: ISODateString | undefined, nextTime: ISOTimeString | undefined) => {
-			if (nextDate == null || nextTime == null) return;
+			// Port change: a cleared part withdraws the staged instant.
+			if (nextDate == null || nextTime == null) return onUnstage?.();
 			onChange({
 				type: 'date_absolute',
 				unixSeconds: isoDateTimeToUnixSeconds(`${nextDate}T${nextTime}` as ISODateTimeString, zone)
@@ -232,6 +243,7 @@
 			value={unixSeconds == null ? undefined : unixSecondsToISODate(unixSeconds, zone)}
 			onChange={(value) => {
 				if (value != null) onChange({ type: 'date_absolute', unixSeconds: isoDateToUnixSeconds(value, zone) });
+				else onUnstage?.();
 			}}
 			{locale}
 		/>
@@ -268,7 +280,11 @@
 					type: 'date_range',
 					value: {
 						start: { type: 'ABSOLUTE', unixSeconds: isoDateToUnixSeconds(range.start, zone) },
-						end: { type: 'ABSOLUTE', unixSeconds: isoDateToUnixSeconds(range.end, zone) }
+						// Port change: the end day is inclusive, so the range ends at its last second.
+						end: {
+							type: 'ABSOLUTE',
+							unixSeconds: isoDateToUnixSeconds(plainDateToISO(plainDateAddDays(plainDateFromISO(range.end), 1)), zone) - 1
+						}
 					}
 				});
 			}}

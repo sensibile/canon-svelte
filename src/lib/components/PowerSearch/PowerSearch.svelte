@@ -217,6 +217,8 @@
 	function handleTokenizerChange(items: PowerSearchItem[], change: TokenizerChange<PowerSearchItem>) {
 		tokenizerSync++;
 		if (change.type === 'add') {
+			// A read-only field takes no new filters either.
+			if (isReadOnly) return;
 			const auxData = change.item.auxiliaryData as PowerSearchAuxData | undefined;
 			if (!auxData) return;
 			if (!config.getField(auxData.fieldKey)) return;
@@ -227,7 +229,7 @@
 				onChange([...filters, { field: auxData.fieldKey, operator: operator.key, value: auxData.filterValue }], 'add', filters.length);
 				return;
 			}
-			if (operator?.value.type === 'empty') {
+			if (operator && commitsWithoutEditor(operator)) {
 				onChange([...filters, { field: auxData.fieldKey, operator: operator.key, value: { type: 'empty' } }], 'add', filters.length);
 				return;
 			}

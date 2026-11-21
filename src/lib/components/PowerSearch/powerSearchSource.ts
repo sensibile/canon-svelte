@@ -1,6 +1,7 @@
 // Port of Astryx usePowerSearchSource (packages/core/src/PowerSearch/usePowerSearchSource.ts), MIT,
 // Meta Platforms, Inc. Port changes: a plain function in place of the memoized hook; the group
-// ordering of Astryx's groupItems is inlined, without group headings.
+// ordering of Astryx's groupItems is inlined, without group headings; typed values are read from
+// the trimmed query (marked "Port change").
 
 import type { SearchSource } from '../Typeahead/types.js';
 import { resolveOperatorLabel } from './resolveOperatorLabel.js';
@@ -21,6 +22,8 @@ export function createPowerSearchSource(
 	return {
 		search(query: string): PowerSearchItem[] {
 			const lower = query.toLowerCase().trim();
+			// Port change: typed values are sliced from the trimmed query, which `lower` matches.
+			const trimmedQuery = query.trim();
 			if (lower === '') {
 				return allItems;
 			}
@@ -75,7 +78,7 @@ export function createPowerSearchSource(
 				for (const op of field.operators) {
 					const prefix = `${fieldLabel} ${opLabel(op).toLowerCase()} `;
 					if (lower.startsWith(prefix) && lower.length > prefix.length) {
-						const rawValue = query.slice(prefix.length);
+						const rawValue = trimmedQuery.slice(prefix.length);
 						const matches = resolveValueMatches(op, rawValue);
 						if (matches.length > 0) {
 							hasExactOperatorMatch = true;
@@ -102,7 +105,7 @@ export function createPowerSearchSource(
 					const remainder = lower.slice(fieldPrefix.length);
 					const isOperatorPrefix = field.operators.some((op) => opLabel(op).toLowerCase().startsWith(remainder));
 					if (!isOperatorPrefix) {
-						const rawValue = query.slice(fieldPrefix.length);
+						const rawValue = trimmedQuery.slice(fieldPrefix.length);
 						for (const op of field.operators) {
 							const matches = resolveValueMatches(op, rawValue);
 							for (const match of matches) {

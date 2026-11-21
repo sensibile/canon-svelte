@@ -155,6 +155,7 @@
 							filterValue={partialFilter.value}
 							onChange={handleValueChange}
 							onEnter={handleSave}
+							onUnstage={() => (partialFilter = { ...partialFilter, value: undefined })}
 							{maxMenuItems}
 							{timezoneID}
 							{locale}
