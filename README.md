@@ -18,6 +18,10 @@ styles are written as Svelte scoped CSS on top of Astryx's CSS custom-property t
 </Theme>
 ```
 
+Themes: `neutral`, `butter`, `chocolate`, `matcha`, `stone`, `gothic`, `y2k`. Import each theme you
+use (`canon-svelte/themes/<name>.css`, which brings its fonts) and pass its name to `Theme`. Themes
+can be nested; a nested `Theme` applies to its subtree only. Theme icon sets are not ported yet.
+
 `mode` is `"light"`, `"dark"` or `"system"`. The outermost `Theme` also sets `data-astryx-theme`
 and `data-theme` on `<html>` so portaled content and browser chrome follow it.
 
@@ -48,13 +52,14 @@ pnpm install
 pnpm dev          # docs site at localhost:5173 (tokens and component gallery)
 pnpm check        # svelte-check
 pnpm build        # docs build + package to dist/
-pnpm sync:astryx  # re-pull reset/tokens/neutral theme CSS from the Astryx npm packages
+pnpm sync:astryx  # re-pull reset, tokens and all theme CSS from the Astryx npm packages
 ```
 
 ## What comes from Astryx
 
-- `src/lib/styles/reset.css`, `src/lib/themes/neutral/*`: copied verbatim from
-  `@astryxdesign/core` and `@astryxdesign/theme-neutral` (currently 0.7.17).
+- `src/lib/styles/reset.css`, `src/lib/themes/<name>/*`: copied verbatim from
+  `@astryxdesign/core` and `@astryxdesign/theme-<name>` (currently 0.7.17), fonts and their
+  licenses included.
 - `src/lib/styles/tokens.css`: default token values extracted from `@astryxdesign/core/dist/astryx.css`.
 - Components: re-implemented in Svelte, ported from the React sources.
 

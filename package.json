@@ -27,7 +27,13 @@
 		"./astryx.css": "./dist/styles/astryx.css",
 		"./reset.css": "./dist/styles/reset.css",
 		"./tokens.css": "./dist/styles/tokens.css",
-		"./themes/neutral.css": "./dist/themes/neutral.css"
+		"./themes/neutral.css": "./dist/themes/neutral.css",
+		"./themes/butter.css": "./dist/themes/butter.css",
+		"./themes/chocolate.css": "./dist/themes/chocolate.css",
+		"./themes/matcha.css": "./dist/themes/matcha.css",
+		"./themes/stone.css": "./dist/themes/stone.css",
+		"./themes/gothic.css": "./dist/themes/gothic.css",
+		"./themes/y2k.css": "./dist/themes/y2k.css"
 	},
 	"scripts": {
 		"dev": "vite dev",

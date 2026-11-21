@@ -1,13 +1,21 @@
 <script lang="ts">
 	import '#lib/styles/astryx.css';
 	import '#lib/themes/neutral.css';
+	import '#lib/themes/butter.css';
+	import '#lib/themes/chocolate.css';
+	import '#lib/themes/matcha.css';
+	import '#lib/themes/stone.css';
+	import '#lib/themes/gothic.css';
+	import '#lib/themes/y2k.css';
 	import { Theme, type ThemeMode } from '#lib';
 
 	let { children } = $props();
 	let mode = $state<ThemeMode>('system');
+	let theme = $state('neutral');
+	const themes = ['neutral', 'butter', 'chocolate', 'matcha', 'stone', 'gothic', 'y2k'];
 </script>
 
-<Theme theme="neutral" {mode}>
+<Theme {theme} {mode}>
 	<div class="shell">
 		<header>
 			<nav>
@@ -15,6 +23,13 @@
 				<a href="/">Tokens</a>
 				<a href="/components">Components</a>
 			</nav>
+			<div class="controls">
+			<label>
+				Theme
+				<select bind:value={theme}>
+					{#each themes as t (t)}<option value={t}>{t}</option>{/each}
+				</select>
+			</label>
 			<label>
 				Mode
 				<select bind:value={mode}>
@@ -23,6 +38,7 @@
 					<option value="dark">Dark</option>
 				</select>
 			</label>
+			</div>
 		</header>
 		<main>{@render children()}</main>
 	</div>
@@ -54,6 +70,10 @@
 	}
 	nav a:hover {
 		color: var(--color-text-primary);
+	}
+	.controls {
+		display: flex;
+		gap: var(--spacing-4);
 	}
 	select {
 		margin-left: var(--spacing-2);

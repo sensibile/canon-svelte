@@ -1,0 +1,3 @@
+/* Gothic theme: Deep blue-grays and a signature display serif. Dramatic and editorial, for surfaces that want to be remembered. Port of @astryxdesign/theme-gothic, MIT. */
+@import './gothic/fonts.css';
+@import './gothic/theme.css';
