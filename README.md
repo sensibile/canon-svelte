@@ -29,9 +29,12 @@ and `data-theme` on `<html>` so portaled content and browser chrome follow it.
 
 Ported so far (props follow Astryx; see each file's header for what isn't ported yet):
 
-- Content: `Text`, `Heading`, `Icon`, `Badge`, `Spinner`, `VisuallyHidden`
-- Action: `Button`, `IconButton`, `Link`
-- Layout: `Stack`, `HStack`, `VStack`, `Divider`
+- Content: `Text`, `Heading`, `Icon`, `Badge`, `Spinner`, `VisuallyHidden`, `Avatar` (`AvatarStatusDot`),
+  `AvatarGroup` (`AvatarGroupOverflow`), `Banner`, `Blockquote`, `Code`, `EmptyState`, `Kbd`,
+  `MetadataList` (`MetadataListItem`), `ProgressBar`, `Skeleton`, `StatusDot`, `Thumbnail`, `Timestamp`, `Token`
+- Action: `Button`, `IconButton`, `Link`, `ClickableCard`
+- Layout: `Stack`, `HStack`, `VStack`, `Divider`, `AspectRatio`, `Card`, `Center`, `Collapsible`
+  (`CollapsibleGroup`), `Grid` (`GridSpan`), `Section`
 - Form: `Field`, `FieldLabel`, `FieldStatus`, `TextInput`, `CheckboxInput`, `Switch`
 - Overlay: `Tooltip`, `InfoTip`, `Popover`, `Dialog`, `DialogHeader`, `DropdownMenu`
   (`DropdownMenuItem`, `DropdownMenuGroup`, `DropdownMenuDivider`), `Toast` (`showToast`, `ToastViewport`)

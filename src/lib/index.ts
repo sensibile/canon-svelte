@@ -89,3 +89,43 @@ export {
 } from './components/Toast/toastStore.svelte.js';
 export { default as Tooltip, type TooltipFocusTrigger } from './components/Tooltip/Tooltip.svelte';
 export { default as VisuallyHidden } from './components/VisuallyHidden/VisuallyHidden.svelte';
+
+// Layout and content (step 4b)
+export { default as AspectRatio } from './components/AspectRatio/AspectRatio.svelte';
+export { default as Avatar, getInitials } from './components/Avatar/Avatar.svelte';
+export { default as AvatarStatusDot } from './components/Avatar/AvatarStatusDot.svelte';
+export type { AvatarNamedSize, AvatarNumericSize, AvatarShape, AvatarSize } from './components/Avatar/context.js';
+export { default as AvatarGroup } from './components/AvatarGroup/AvatarGroup.svelte';
+export { default as AvatarGroupOverflow } from './components/AvatarGroup/AvatarGroupOverflow.svelte';
+export { default as Banner, type BannerStatus, type CollapsibleConfig } from './components/Banner/Banner.svelte';
+export { default as Blockquote } from './components/Blockquote/Blockquote.svelte';
+export { default as Card, type CardVariant } from './components/Card/Card.svelte';
+export { default as Center } from './components/Center/Center.svelte';
+export { default as ClickableCard } from './components/ClickableCard/ClickableCard.svelte';
+export { default as Code } from './components/Code/Code.svelte';
+export { default as Collapsible } from './components/Collapsible/Collapsible.svelte';
+export { default as CollapsibleGroup } from './components/Collapsible/CollapsibleGroup.svelte';
+export type { CollapsibleChevronPosition, CollapsibleGroupDensity } from './components/Collapsible/context.js';
+export { default as EmptyState } from './components/EmptyState/EmptyState.svelte';
+export {
+	default as Grid,
+	gridTemplate,
+	type GridAlignment,
+	type GridColumns
+} from './components/Grid/Grid.svelte';
+export { default as GridSpan } from './components/Grid/GridSpan.svelte';
+export { default as Kbd } from './components/Kbd/Kbd.svelte';
+export { default as MetadataList } from './components/MetadataList/MetadataList.svelte';
+export { default as MetadataListItem } from './components/MetadataList/MetadataListItem.svelte';
+export { default as ProgressBar, type ProgressBarVariant } from './components/ProgressBar/ProgressBar.svelte';
+export { default as Section } from './components/Section/Section.svelte';
+export { default as Skeleton } from './components/Skeleton/Skeleton.svelte';
+export { default as StatusDot } from './components/StatusDot/StatusDot.svelte';
+export { default as Thumbnail } from './components/Thumbnail/Thumbnail.svelte';
+export { default as Timestamp } from './components/Timestamp/Timestamp.svelte';
+export type {
+	InstantFormat,
+	TimestampFormat,
+	TimestampTooltipEntry
+} from './components/Timestamp/format.js';
+export { default as Token, type TokenColor, type TokenSize } from './components/Token/Token.svelte';

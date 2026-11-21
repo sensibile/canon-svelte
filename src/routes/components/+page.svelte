@@ -30,6 +30,7 @@
 		type DropdownMenuOption,
 		type IconName
 	} from '#lib';
+	import LayoutContentDemos from './LayoutContentDemos.svelte';
 
 	let name = $state('');
 	let email = $state('not-an-email');
@@ -260,6 +261,8 @@
 		</div>
 	</section>
 
+	<LayoutContentDemos />
+
 	<Dialog isOpen={dialogPurpose != null} onOpenChange={(o) => !o && (dialogPurpose = null)} purpose={dialogPurpose ?? 'info'}>
 		<DialogHeader
 			title={dialogPurpose === 'required' ? 'Accept the new terms' : 'Rename project'}
@@ -279,7 +282,7 @@
 </VStack>
 
 <style>
-	section :global(.demo) {
+	:global(section .demo) {
 		margin-top: var(--spacing-4);
 		padding: var(--spacing-6);
 		border: 1px solid var(--color-border);
