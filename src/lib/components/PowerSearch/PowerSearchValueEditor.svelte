@@ -6,7 +6,9 @@
   control no longer shows (a cleared date or time). The parent remounts this per field and operator.
   Port changes: clearing a date or time, or text it rejects, unstages its value, typed numbers stage as they change,
   `isArbitraryStringAllowed` stages a suggestion field's typed text, a stepped number replaces the typed
-  text Enter would apply, and a range's end is stored as the last second of its end day.
+  text Enter would apply, a range's end is stored as the last second of its end day, an entity list
+  offers creation when `isArbitraryStringAllowed` is set or it has no search source, and a custom editor
+  reporting null unstages its value.
   Not yet ported: the bottom-sheet presentation (its full-width controls and inline range calendar).
 -->
 <script lang="ts" module>
@@ -371,13 +373,14 @@
 		renderItem={operatorValue.renderItem}
 		placeholder={strings.valueEditor.searchPlaceholder}
 		debounceMs={operatorValue.searchSource ? 150 : 0}
+		hasCreate={operatorValue.isArbitraryStringAllowed || !operatorValue.searchSource}
 		{maxMenuItems}
 	/>
 {:else if operatorValue.type === 'custom'}
 	{@const Editor = operatorValue.Editor}
 	<Editor
 		{isDisabled}
-		onChange={(value) => value != null && onChange({ type: 'custom', value })}
+		onChange={(value) => (value != null ? onChange({ type: 'custom', value }) : onUnstage())}
 		placeholder={strings.valueEditor.enterValuePlaceholder}
 		value={filterValue?.type === 'custom' ? filterValue.value : null}
 	/>
