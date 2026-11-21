@@ -1,0 +1,3 @@
+/* Chocolate theme: rich browns with Fraunces headings and Albert Sans body. Port of @astryxdesign/theme-chocolate, MIT. */
+@import './chocolate/fonts.css';
+@import './chocolate/theme.css';

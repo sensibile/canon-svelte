@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 // Re-sync the CSS this port takes verbatim from Astryx (MIT, Meta Platforms, Inc.):
-// reset.css, default tokens (from dist/astryx.css), and the neutral theme + fonts.
+// reset.css, default tokens (from dist/astryx.css), and every theme + its fonts.
 // Usage: node scripts/sync-astryx.mjs [version]   (default: ASTRYX_VERSION below)
 import { execFileSync } from 'node:child_process';
-import { cpSync, mkdtempSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -25,7 +25,7 @@ function fetchPkg(name) {
 }
 
 const core = fetchPkg('@astryxdesign/core');
-const neutral = fetchPkg('@astryxdesign/theme-neutral');
+export const THEMES = ['neutral', 'butter', 'chocolate', 'matcha', 'stone', 'gothic', 'y2k'];
 
 cpSync(join(core, 'src/reset.css'), join(root, 'src/lib/styles/reset.css'));
 
@@ -55,10 +55,12 @@ writeFileSync(
 	].join('\n')
 );
 
-const nDir = join(root, 'src/lib/themes/neutral');
-cpSync(join(neutral, 'dist/theme.css'), join(nDir, 'theme.css'));
-cpSync(join(neutral, 'fonts.css'), join(nDir, 'fonts.css'));
-for (const f of readdirSync(join(neutral, 'fonts'))) {
-	cpSync(join(neutral, 'fonts', f), join(nDir, 'fonts', f));
+for (const name of THEMES) {
+	const pkg = fetchPkg(`@astryxdesign/theme-${name}`);
+	const dir = join(root, 'src/lib/themes', name);
+	mkdirSync(join(dir, 'fonts'), { recursive: true });
+	cpSync(join(pkg, 'dist/theme.css'), join(dir, 'theme.css'));
+	cpSync(join(pkg, 'fonts.css'), join(dir, 'fonts.css'));
+	for (const f of readdirSync(join(pkg, 'fonts'))) cpSync(join(pkg, 'fonts', f), join(dir, 'fonts', f));
 }
-console.log(`Synced Astryx ${version}: ${decls.length} tokens, neutral theme.`);
+console.log(`Synced Astryx ${version}: ${decls.length} tokens, themes: ${THEMES.join(', ')}.`);

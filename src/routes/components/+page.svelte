@@ -71,7 +71,7 @@
 <VStack gap={10}>
 	<VStack gap={2}>
 		<Heading level={1}>Components</Heading>
-		<Text type="supporting">Step 2 of the Astryx port: core content, action and form components.</Text>
+		<Text type="supporting">Ported Astryx components. Switch themes and color modes from the header.</Text>
 	</VStack>
 
 	<section>
