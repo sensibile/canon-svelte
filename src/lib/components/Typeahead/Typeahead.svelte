@@ -350,7 +350,7 @@
 				{/if}
 				{#if name != null && !isDisabled}
 					<!-- The search draft isn't the field's value: submit the picked item's id under `name`. -->
-					<input type="hidden" {name} value={value?.id ?? ''} />
+					<input type="hidden" {name} form={rest.form} value={value?.id ?? ''} />
 				{/if}
 				<input
 					{...rest}

@@ -434,7 +434,7 @@
 			/>
 			{#if isAtMax}<VisuallyHidden id={limitId}>Limit of {maxEntries} reached</VisuallyHidden>{/if}
 			{#if htmlName != null && !isDisabled}
-				{#each value as item (item.id)}<input type="hidden" name={htmlName} value={item.id} />{/each}
+				{#each value as item (item.id)}<input type="hidden" name={htmlName} form={rest.form} value={item.id} />{/each}
 			{/if}
 			<span class="end">
 				{#if search.isLoading}<Spinner size="sm" label="Loading" />{/if}
