@@ -97,6 +97,13 @@
 		.section-outer:last-child { margin-bottom: calc(-1 * var(--container-padding-block-end, 0px)); }
 
 		.section {
+			/* Each Section starts without overrides, so an outer Section's padding props don't leak in;
+			   the inline style from this Section's own props wins over these. */
+			--_section-padding: initial;
+			--_section-pis: initial;
+			--_section-pie: initial;
+			--_section-pbs: initial;
+			--_section-pbe: initial;
 			--_pad: var(--_section-padding, var(--astryx-section-padding, var(--spacing-4)));
 			--_pad-inline: var(--_section-padding, var(--astryx-section-padding-inline, var(--_pad)));
 			--container-padding-inline-start: var(--_section-pis, var(--_section-padding, var(--astryx-section-padding-inline-start, var(--_pad-inline))));

@@ -121,8 +121,7 @@
 						size="sm"
 						isIconOnly
 						class="thumbnail-remove"
-						aria-disabled={isDisabled ? 'true' : undefined}
-						onkeydown={isDisabled ? suppressActivation : undefined}
+						{isDisabled}
 						onclick={(e: MouseEvent) => {
 							e.stopPropagation();
 							if (!isDisabled) onRemove?.(e);

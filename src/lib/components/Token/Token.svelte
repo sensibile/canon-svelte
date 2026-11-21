@@ -90,8 +90,19 @@
 	}
 	/** Clicking the chip body (not a nested control) activates the label link/button. */
 	function onContainerClick(e: MouseEvent) {
-		if (isDisabled || (e.target as HTMLElement).closest('button, a')) return;
-		labelEl?.click();
+		if (isDisabled || !labelEl || (e.target as HTMLElement).closest('button, a')) return;
+		// Re-dispatch with the original modifiers so Ctrl/Cmd/Shift-click keep their link meaning.
+		labelEl.dispatchEvent(
+			new MouseEvent('click', {
+				bubbles: true,
+				cancelable: true,
+				ctrlKey: e.ctrlKey,
+				metaKey: e.metaKey,
+				shiftKey: e.shiftKey,
+				altKey: e.altKey,
+				button: e.button
+			})
+		);
 	}
 </script>
 
