@@ -178,3 +178,12 @@ export { default as Typeahead, type TypeaheadSize } from './components/Typeahead
 export { default as TypeaheadItem } from './components/Typeahead/TypeaheadItem.svelte';
 export { createStaticSource, type CreateStaticSourceOptions } from './components/Typeahead/createStaticSource.js';
 export type { SearchableItem, SearchContext, SearchSource } from './components/Typeahead/types.js';
+export {
+	default as Calendar,
+	type CalendarMode,
+	type CalendarValue,
+	type DateRange,
+	type DayOfWeek,
+	type DayOfWeekName,
+	type ISODateString
+} from './components/Calendar/Calendar.svelte';

@@ -11,3 +11,12 @@ export function characterCount(str: string): number {
 	}
 	return [...str].length;
 }
+
+/** The first user-perceived character, so a capital never splits an emoji or a combining mark. */
+export function firstCharacter(str: string): string {
+	if (str === '') return '';
+	if (segmenter) {
+		for (const { segment } of segmenter.segment(str)) return segment;
+	}
+	return [...str][0] ?? '';
+}
