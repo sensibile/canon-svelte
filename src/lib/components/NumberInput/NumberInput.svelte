@@ -260,18 +260,19 @@
 		if (reselect) queueMicrotask(() => input.setSelectionRange(0, input.value.length));
 	}
 
-	function commitPendingInput(trigger: 'blur' | 'Enter') {
-		if (pendingInput === null) return;
+	/** Commits the draft; returns false when the draft was rejected and stays on screen. */
+	function commitPendingInput(trigger: 'blur' | 'Enter'): boolean {
+		if (pendingInput === null) return true;
 		if (isDisabled) {
 			endDraft();
-			return;
+			return true;
 		}
 		const rejection = toEntryError(pendingInput, getNumberInputRejection(pendingInput, rules));
 		if (rejection != null) {
 			shownRejection = rejection;
 			reportEntryError(rejection);
 			if (trigger === 'blur') isDraftKeptAtBlur = true;
-			return;
+			return false;
 		}
 		shownRejection = null;
 		isDraftKeptAtBlur = false;
@@ -283,6 +284,7 @@
 		} else if (decision.type === 'commit' && decision.value !== value) {
 			emit(decision.value);
 		}
+		return true;
 	}
 
 	function handleBlur(e: FocusEvent) {
@@ -354,7 +356,8 @@
 			return;
 		}
 		if (e.key === 'Enter') {
-			commitPendingInput('Enter');
+			// A rejected draft must not reach the form through implicit submission.
+			if (!commitPendingInput('Enter')) e.preventDefault();
 			onEnter?.();
 		}
 		onkeydown?.(e);
