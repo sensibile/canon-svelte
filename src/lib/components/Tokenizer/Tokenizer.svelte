@@ -6,8 +6,11 @@
   `hasCreate` offers the query itself as a new item; `maxEntries` caps the count.
   Keyboard: type to search; ArrowDown/ArrowUp wrap through results; Enter adds; Escape closes;
   Backspace in the empty field removes the last token.
+  `isItemRemovable` keeps chosen items from removal, and `clearAllMessage` words the Clear all
+  announcement (Astryx passes both through context). `focus()` and `blur()` move focus to and from
+  the input (bind:this).
   Not yet ported: token overflow behaviors ("+N more" when unfocused), the bottom-sheet
-  presentation, reordering, the custom `menu`, the imperative handle.
+  presentation, reordering, the custom `menu`.
 -->
 <script lang="ts" module>
 	import type { SearchableItem } from '../Typeahead/types.js';
@@ -61,6 +64,10 @@
 		hasCreate?: boolean;
 		/** Show a "Clear all" button while there are tokens. */
 		hasClear?: boolean;
+		/** Whether a chosen item can be removed; all can by default. */
+		isItemRemovable?: (item: T) => boolean;
+		/** The announcement after Clear all. */
+		clearAllMessage?: string;
 		endContent?: Snippet;
 		isLabelHidden?: boolean;
 		description?: string;
@@ -100,6 +107,8 @@
 		emptySearchText = 'No results found',
 		hasCreate = false,
 		hasClear = false,
+		isItemRemovable,
+		clearAllMessage = 'All items removed',
 		endContent,
 		isLabelHidden = false,
 		description,
@@ -229,8 +238,10 @@
 		if (hasEntriesOnFocus && !(maxEntries != null && next.length >= maxEntries)) queueMicrotask(() => search.openFor(''));
 	}
 
+	const canRemove = (item: T) => isItemRemovable?.(item) ?? true;
+
 	function remove(item: T) {
-		if (isDisabled) return;
+		if (isDisabled || !canRemove(item)) return;
 		const next = value.filter((v) => v.id !== item.id);
 		value = next;
 		onChange?.(next, { item, type: 'remove' });
@@ -246,13 +257,25 @@
 	}
 
 	function clearAll() {
-		if (isDisabled || value.length === 0) return;
-		const last = value[value.length - 1];
-		value = [];
-		onChange?.([], { item: last, type: 'remove' });
-		announcement = 'All items removed';
+		const removed = value.filter(canRemove);
+		if (isDisabled || removed.length === 0) return;
+		// onChange names one item: the last one removed.
+		const next = value.filter((item) => !canRemove(item));
+		value = next;
+		onChange?.(next, { item: removed[removed.length - 1], type: 'remove' });
+		announcement = clearAllMessage;
 		inputEl?.focus();
 		refreshResults();
+	}
+
+	/** Move focus to the input. */
+	export function focus() {
+		inputEl?.focus();
+	}
+
+	/** Move focus out of the input. */
+	export function blur() {
+		inputEl?.blur();
 	}
 
 	function onKeydown(e: KeyboardEvent & { currentTarget: EventTarget & HTMLInputElement }) {
@@ -396,7 +419,7 @@
 					{#if renderToken}
 						{@render renderToken(item, () => remove(item))}
 					{:else}
-						<Token label={item.label} {size} {isDisabled} onRemove={() => remove(item)} />
+						<Token label={item.label} {size} {isDisabled} onRemove={canRemove(item) ? () => remove(item) : undefined} />
 					{/if}
 				</span>
 			{/each}
@@ -439,7 +462,7 @@
 			{/if}
 			<span class="end">
 				{#if search.isLoading}<Spinner size="sm" label="Loading" />{/if}
-				{#if hasClear && value.length > 0 && !isDisabled}
+				{#if hasClear && value.some(canRemove) && !isDisabled}
 					<span data-tokenizer-keep>
 						<Button
 							class="astryx-input-clear-button input-clear"
