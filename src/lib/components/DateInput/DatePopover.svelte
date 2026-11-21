@@ -8,6 +8,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import Layer from '../Layer/Layer.svelte';
+	import { on } from 'svelte/events';
 	import { pushLayer } from '../../internal/layerStack.js';
 
 	interface Props {
@@ -85,12 +86,13 @@
 			onDismiss(true);
 		};
 		doc.addEventListener('pointerdown', onPointerDown, true);
-		el.addEventListener('keydown', onKey);
+		// Through `on`, so a delegated handler inside (the calendar cancelling a range) runs first.
+		const offKey = on(el, 'keydown', onKey);
 		return () => {
 			cancelAnimationFrame(frame);
 			layer.remove();
 			doc.removeEventListener('pointerdown', onPointerDown, true);
-			el.removeEventListener('keydown', onKey);
+			offKey();
 			// Escape, or a press on empty space, leaves focus nowhere: give it back to the field.
 			// Checked after the pressing pointer's mousedown has moved focus.
 			setTimeout(() => isFocusDetached(doc) && onDismiss(true));

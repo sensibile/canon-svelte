@@ -77,7 +77,14 @@ export class TypedTimeField {
 		if (!text.trim()) return EMPTY_DRAFT;
 		const { locale, hasSeconds, min, max, hourFormat } = this.options;
 		const time = parseLocaleTime(text, locale, hasSeconds);
-		if (time == null) return { time: null, rejection: { kind: 'unreadable', text }, isComplete: false };
+		// Complete text that names no time, such as "25:00", shows its rejection under 'complete' too.
+		if (time == null) {
+			return {
+				time: null,
+				rejection: { kind: 'unreadable', text },
+				isComplete: isLocaleTimeComplete(text, locale, hourFormat, hasSeconds)
+			};
+		}
 		if (!isTimeInRange(time, min, max)) {
 			return {
 				time: null,

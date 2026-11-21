@@ -1,4 +1,5 @@
-// Copied from @astryxdesign/core utils (MIT, Meta Platforms, Inc.). Adapted imports only.
+// Copied from @astryxdesign/core utils (MIT, Meta Platforms, Inc.). Adapted imports, plus one
+// marked "Port change" in parseTimeInput.
 
 /**
  * @file timeParser.ts
@@ -263,6 +264,10 @@ export function parseTimeInput(
 	// Handle colon-separated formats
 	const colonParts = timeStr.split(':');
 	if (colonParts.length >= 2 && colonParts.length <= 3) {
+		// Port change: each field must be all digits, so "14oops:30" is not read as 14:30.
+		if (!colonParts.every((part) => /^\s*\d{1,2}\s*$/.test(part))) {
+			return null;
+		}
 		let hour = parseInt(colonParts[0], 10);
 		const minute = parseInt(colonParts[1], 10);
 		const second = colonParts.length === 3 ? parseInt(colonParts[2], 10) : 0;
