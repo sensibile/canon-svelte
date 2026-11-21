@@ -1,4 +1,5 @@
-// Copied from @astryxdesign/core utils (MIT, Meta Platforms, Inc.). Adapted imports only.
+// Copied from @astryxdesign/core utils (MIT, Meta Platforms, Inc.). Adapted imports, plus changes
+// marked "Port change".
 
 type Locale = string;
 
@@ -159,6 +160,12 @@ export function parseDateInput(
 	const parsed = new Date(trimmed);
 	if (!isNaN(parsed.getTime())) {
 		const fromDate = plainDateFromDate(parsed);
+		// Port change: native parsing rolls an impossible day over ("Feb. 30" becomes March 2).
+		// A day the text never names is such a rollover, not the date typed.
+		const numbers = (trimmed.match(/\d+/g) ?? []).map(Number);
+		if (!numbers.includes(fromDate.day)) {
+			return null;
+		}
 		// Validate the result so we never return an out-of-range date (e.g. a
 		// year of 0), which would throw when later re-parsed.
 		return tryCreatePlainDate(fromDate.year, fromDate.month, fromDate.day);
