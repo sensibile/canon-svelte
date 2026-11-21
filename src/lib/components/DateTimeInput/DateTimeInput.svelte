@@ -515,11 +515,20 @@
 					case 'Enter': {
 						e.preventDefault();
 						const pending = typedTime.pendingInput;
-						const typed =
-							highlightFollowsTyping && pending !== null ? parseLocaleTime(pending, locale, hasSeconds) : null;
+						if (highlightFollowsTyping && pending !== null) {
+							// Typed text decides: a time the field accepts commits; anything else stays
+							// with its rejection rather than falling back to the highlighted option.
+							const typed = parseLocaleTime(pending, locale, hasSeconds);
+							if (typed && isTimeInRange(typed, timeMin, timeMax)) {
+								commitTimeOption(typed);
+							} else {
+								hideTimeOptions();
+								commitTypedTime(typedTime.commit('enter'));
+							}
+							return;
+						}
 						const option = timeOptions[activeTimeIndex];
-						if (typed) commitTimeOption(typed);
-						else if (option) commitTimeOption(option.time);
+						if (option) commitTimeOption(option.time);
 						return;
 					}
 					case 'Tab':
