@@ -180,7 +180,10 @@ export class TypedTimeField {
 		this.committedBy = null;
 		this.keptRejection = next.rejection == null ? null : isFresh ? next.rejection : (shownBefore ?? this.keptRejection);
 		if (next.rejection == null || isFresh) this.#reportIfEditable(next.rejection);
-		if (next.time == null || next.time === o.value) return null;
+		// Unfinished text such as "2:3" reads as a time already: report it only once it is complete.
+		if (next.time == null || next.time === o.value || !isLocaleTimeComplete(text, o.locale, o.hourFormat, o.hasSeconds)) {
+			return null;
+		}
 		this.#lastCommitted = { time: next.time };
 		return next.time;
 	}

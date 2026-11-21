@@ -6,6 +6,7 @@
   Picking a date keeps the time (or uses now), clamped into `min`/`max` on their own days. The
   time commits only once a date is set. With `timeOptionInterval`, the time also offers a list of
   times (Alt+ArrowDown or a click opens it). ArrowUp/ArrowDown otherwise step the time.
+  Emptying the time clears the value. With `name`, a hidden input posts the ISO value.
   Gregorian only (pass `locale`). Not yet ported: the native and bottom-sheet presentations for
   touch, `changeAction` (optimistic async change), and FormLayout's default entry error behavior.
 -->
@@ -445,9 +446,13 @@
 		timeInputEl?.focus();
 	}
 
-	/** The time commits only once a date is set. */
+	/** The time commits only once a date is set. Emptied time text clears the value. */
 	function commitTypedTime(time: ISOTimeString | undefined | null) {
-		if (time == null || !valueParts.date) return;
+		if (time === undefined) {
+			if (value !== undefined) fireChange(undefined);
+			return;
+		}
+		if (time === null || !valueParts.date) return;
 		const combined = combineDateTime(valueParts.date, time);
 		if (combined) fireChange(combined);
 	}
@@ -593,8 +598,6 @@
 					{...rest}
 					bind:this={dateInputEl}
 					id={dateInputId}
-					name={typedDate.hiddenFormValue === null ? name : undefined}
-					{form}
 					type="text"
 					role="combobox"
 					value={typedDate.displayValue}
@@ -628,8 +631,9 @@
 					}}
 					onkeydown={handleDateKeydown}
 				/>
-				{#if typedDate.hiddenFormValue !== null && name != null}
-					<input type="hidden" {name} {form} value={typedDate.hiddenFormValue} />
+				<!-- The form gets the combined ISO value; neither text segment holds all of it. -->
+				{#if name != null && !isDisabled}
+					<input type="hidden" {name} {form} value={value ?? ''} />
 				{/if}
 				<!-- Announces the date rejection message that the field status does not announce. -->
 				<VisuallyHidden role="alert" aria-live="assertive">{typedDate.alertMessage}</VisuallyHidden>

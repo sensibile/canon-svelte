@@ -3,7 +3,7 @@
   Meta Platforms, Inc. A text field you type a time into. Values are ISO `HH:MM` (or `HH:MM:SS`
   with `hasSeconds`) strings; use `bind:value`, or `value` + `onChange(value)`.
   A typed time commits while typing once it is complete and allowed; Enter and blur commit the
-  rest. Text the field can't accept stays, with an error, and `onEntryErrorChange` reports why.
+  rest. A disabled field posts nothing. Text the field can't accept stays, with an error, and `onEntryErrorChange` reports why.
   ArrowUp/ArrowDown step the time by `increment` minutes and announce it.
   Inside an `InputGroup` it renders only its control. Not yet ported: the native and wheel
   presentations for touch (`presentation`, `nativePicker`), `changeAction` (optimistic async
@@ -284,7 +284,7 @@
 				bind:this={inputEl}
 				{id}
 				type="text"
-				name={typed.isNameOnHiddenInput ? undefined : name}
+				name={typed.isNameOnHiddenInput || isDisabled ? undefined : name}
 				{form}
 				value={displayValue}
 				placeholder={displayPlaceholder}
@@ -310,7 +310,7 @@
 				}}
 				onkeydown={handleKeydown}
 			/>
-			{#if name != null && typed.isNameOnHiddenInput}
+			{#if name != null && typed.isNameOnHiddenInput && !isDisabled}
 				<input type="hidden" {name} {form} value={timeValue ? formatDisplayTime(timeValue) : ''} />
 			{/if}
 			<!-- Announces the rejection message that the field status does not announce. -->
