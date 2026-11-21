@@ -193,3 +193,8 @@ export {
 	type DateInputSize
 } from './components/DateInput/DateInput.svelte';
 export type { DateInputEntryError, EntryErrorBehavior } from './components/DateInput/typedDate.svelte.js';
+export {
+	default as DateRangeInput,
+	type DateRangeInputSize,
+	type DateRangePreset
+} from './components/DateRangeInput/DateRangeInput.svelte';

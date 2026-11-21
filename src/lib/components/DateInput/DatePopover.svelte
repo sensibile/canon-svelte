@@ -22,6 +22,8 @@
 		onDismiss: (restoreFocus: boolean) => void;
 		/** Move focus into the layer on open. */
 		autoFocus: boolean;
+		/** Where focus goes on open: the calendar's day tab stop, or the first tab stop. */
+		initialFocus?: 'day' | 'first';
 		element?: HTMLElement;
 		children: Snippet;
 	}
@@ -35,6 +37,7 @@
 		isOwnPress,
 		onDismiss,
 		autoFocus,
+		initialFocus = 'day',
 		element = $bindable(),
 		children
 	}: Props = $props();
@@ -57,13 +60,18 @@
 		const layer = pushLayer();
 		let frame = 0;
 		if (autoFocus) {
-			// The calendar's tab stop: the selected day, today, or the month's first enabled day.
-			frame = requestAnimationFrame(() =>
-				(
-					el.querySelector<HTMLElement>('button[data-date][tabindex="0"]') ??
-					el.querySelector<HTMLElement>('button:not([disabled])')
-				)?.focus()
-			);
+			// 'day': the calendar's tab stop, the selected day, today, or the month's first enabled
+			// day. 'first': the first tab stop in document order, as Astryx's usePopover does.
+			const selectors =
+				initialFocus === 'day'
+					? ['button[data-date][tabindex="0"]', 'button:not([disabled])']
+					: ['button:not([disabled]):not([tabindex="-1"]):not(.close-button)', 'button:not([disabled])'];
+			frame = requestAnimationFrame(() => {
+				for (const selector of selectors) {
+					const target = el.querySelector<HTMLElement>(selector);
+					if (target) return target.focus();
+				}
+			});
 		}
 		const onPointerDown = (e: PointerEvent) => {
 			if (!layer.isTop()) return;
