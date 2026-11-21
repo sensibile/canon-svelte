@@ -20,3 +20,16 @@ export function firstCharacter(str: string): string {
 	}
 	return [...str][0] ?? '';
 }
+
+function splitCharacters(str: string): string[] {
+	if (segmenter) return [...segmenter.segment(str)].map((s) => s.segment);
+	return [...str];
+}
+
+/** Cut a string to `max` user-perceived characters, ending with `ellipsis` when cut. */
+export function truncateCharacters(str: string, max: number, ellipsis = '…'): string {
+	const characters = splitCharacters(str);
+	if (characters.length <= max) return str;
+	const keep = Math.max(max - characterCount(ellipsis), 0);
+	return characters.slice(0, keep).join('') + ellipsis;
+}
