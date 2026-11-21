@@ -205,3 +205,11 @@ export {
 } from './components/TimeInput/TimeInput.svelte';
 export type { TimeInputEntryError } from './components/TimeInput/typedTime.svelte.js';
 export type { ISOTimeString } from './internal/date/timeParser.js';
+export {
+	default as DateTimeInput,
+	type DateTimeInputHourFormat,
+	type DateTimeInputSize,
+	type DateTimeInputTimeIncrement,
+	type DateTimeInputTimeOptionInterval,
+	type ISODateTimeString
+} from './components/DateTimeInput/DateTimeInput.svelte';
