@@ -538,7 +538,10 @@
 			}
 		}
 		if (e.key === 'Enter') {
-			commitTypedTime(typedTime.commit('enter'));
+			const time = typedTime.commit('enter');
+			// A rejected draft holds back a form's submission.
+			if (time === null && typedTime.draft.rejection != null) e.preventDefault();
+			commitTypedTime(time);
 			return;
 		}
 		if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {

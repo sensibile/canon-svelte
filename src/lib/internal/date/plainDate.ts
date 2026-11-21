@@ -1,4 +1,5 @@
-// Copied from @astryxdesign/core utils (MIT, Meta Platforms, Inc.). Adapted imports only.
+// Copied from @astryxdesign/core utils (MIT, Meta Platforms, Inc.). Adapted imports, plus changes
+// marked "Port change".
 
 type Locale = string;
 
@@ -82,7 +83,8 @@ export function getDaysInMonth(year: number, month: number): number {
 }
 
 export function plainDateDayOfWeek(pd: PlainDate): number {
-	return plainDateToDate(pd).getDay();
+	// Port change: UTC, like plainDateAddDays.
+	return new Date(utcTime(pd.year, pd.month - 1, pd.day)).getUTCDay();
 }
 
 export function plainDateAddMonths(pd: PlainDate, n: number): PlainDate {
@@ -97,9 +99,10 @@ export function plainDateAddMonths(pd: PlainDate, n: number): PlainDate {
 }
 
 export function plainDateAddDays(pd: PlainDate, n: number): PlainDate {
-	const d = plainDateToDate(pd);
-	d.setDate(d.getDate() + n);
-	return plainDateFromDate(d);
+	// Port change: UTC arithmetic, so a civil date a local time zone skipped (Apia, 2011-12-30)
+	// is still a day of its own.
+	const d = new Date(utcTime(pd.year, pd.month - 1, pd.day + n));
+	return {year: d.getUTCFullYear(), month: d.getUTCMonth() + 1, day: d.getUTCDate()};
 }
 
 /**

@@ -225,9 +225,10 @@
 		// An IME candidate window uses the arrows too.
 		if (!e.isComposing && e.keyCode !== 229 && !isDisabled) {
 			if (e.key === 'Enter') {
-				// Enter commits the draft without preventing a form's submission.
+				// Enter commits the draft; a form submits unless the draft stays rejected.
 				const time = typed.commit('enter');
 				if (time !== null) fireChange(time);
+				else if (typed.draft.rejection != null) e.preventDefault();
 			} else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
 				e.preventDefault();
 				let current = timeValue;
