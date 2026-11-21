@@ -1,7 +1,8 @@
 <!--
   Port of Astryx `TextInput` (packages/core/src/TextInput/TextInput.tsx), MIT, Meta Platforms, Inc.
   Use `bind:value`, or `value` + `onChange(value, event)` like Astryx.
-  Not yet ported: the "tooltip" status variant, InputGroup integration.
+  Inside an `InputGroup` it renders only its control, named by the group label plus its own.
+  Not yet ported: the "tooltip" status variant.
 -->
 <script lang="ts" module>
 	export type TextInputType = 'text' | 'password' | 'email' | 'search' | 'tel' | 'url';
@@ -19,6 +20,7 @@
 	import VisuallyHidden from '../VisuallyHidden/VisuallyHidden.svelte';
 	import Tooltip from '../Tooltip/Tooltip.svelte';
 	import type { SizeValue } from '../../types.js';
+	import { getInputGroupContext, INPUT_GROUP_ITEM } from '../InputGroup/context.js';
 
 	interface Props
 		extends Omit<HTMLInputAttributes, 'type' | 'size' | 'value' | 'disabled' | 'readonly' | 'required' | 'onchange'> {
@@ -64,14 +66,14 @@
 		description,
 		isOptional = false,
 		isRequired = false,
-		isDisabled = false,
+		isDisabled: isDisabledProp = false,
 		isReadOnly = false,
 		disabledMessage,
 		labelTooltip,
 		startIcon,
 		status,
 		statusVariant = 'attached',
-		size = 'md',
+		size: sizeProp,
 		isLoading = false,
 		placeholder,
 		width,
@@ -87,23 +89,31 @@
 		controlClass,
 		id: idProp,
 		'aria-describedby': describedByProp,
+		'aria-labelledby': labelledByProp,
 		...rest
 	}: Props = $props();
+
+	const inputGroup = getInputGroupContext();
+	const isDisabled = $derived(isDisabledProp || (inputGroup?.isDisabled ?? false));
+	const size = $derived(sizeProp ?? inputGroup?.size ?? 'md');
 
 	const uid = $props.id();
 	const id = $derived(idProp ?? `${uid}-input`);
 	const descriptionID = `${uid}-desc`;
 	const statusMessageID = `${uid}-status`;
 	const disabledMessageID = `${uid}-disabled-reason`;
+	const inputLabelID = `${uid}-input-label`;
 	const showsDisabledMessage = $derived(isDisabled && !!disabledMessage);
 	let inputEl: HTMLInputElement | undefined = $state();
 
-	const messagelessError = $derived(status?.type === 'error' && !status.message);
+	// In a group, the group's own status carries any message.
+	const messagelessError = $derived(!inputGroup && status?.type === 'error' && !status.message);
 	const describedBy = $derived(
 		[
 			describedByProp,
-			description ? descriptionID : null,
-			status?.message || messagelessError ? statusMessageID : null,
+			inputGroup?.describedByIDs,
+			description && !inputGroup ? descriptionID : null,
+			!inputGroup && (status?.message || messagelessError) ? statusMessageID : null,
 			showsDisabledMessage ? disabledMessageID : null
 		]
 			.filter(Boolean)
@@ -142,34 +152,25 @@
 	$effect(() => {
 		if (hasAutoFocus) inputEl?.focus();
 	});
+	const labelledBy = $derived(
+		inputGroup
+			? [inputGroup.labelID, inputLabelID, labelledByProp].filter(Boolean).join(' ')
+			: labelledByProp
+	);
 </script>
 
-<Field
-	class={containerClass}
-	{label}
-	{isLabelHidden}
-	{description}
-	inputID={id}
-	descriptionID={description ? descriptionID : undefined}
-	{isOptional}
-	{isRequired}
-	{isDisabled}
-	{labelTooltip}
-	status={status
-		? { type: status.type, message: status.message, messageID: status.message ? statusMessageID : undefined }
-		: undefined}
-	{statusVariant}
-	{width}
->
+{#snippet control()}
 	<Tooltip content={disabledMessage ?? ''} isEnabled={showsDisabledMessage} focusTrigger="always">
 		<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
 		<div
 			class={['astryx-text-input', 'control', controlClass]}
 			class:disabled={isDisabled}
+			class:in-group={inputGroup != null}
 			data-size={size}
 			data-status={status?.type}
 			data-disabled={isDisabled ? 'disabled' : undefined}
 			data-readonly={isReadOnly ? 'readonly' : undefined}
+			{...{ [INPUT_GROUP_ITEM]: inputGroup ? '' : undefined }}
 			onclick={focusFromWrapper}
 		>
 			{#if startIcon}<Icon icon={startIcon} size="sm" color="secondary" />{/if}
@@ -184,6 +185,7 @@
 				spellcheck={hasSpellCheck}
 				readonly={isReadOnly || isDisabled || undefined}
 				aria-disabled={isDisabled ? 'true' : undefined}
+				aria-labelledby={labelledBy}
 				aria-describedby={describedBy}
 				aria-required={isRequired && !isOptional ? 'true' : undefined}
 				aria-invalid={status?.type === 'error' ? 'true' : undefined}
@@ -206,15 +208,40 @@
 				/>
 			{/if}
 			{#if status}<Icon icon={status.type} size="md" color={status.type} />{/if}
+			{#if inputGroup}<VisuallyHidden id={inputLabelID}>{label}</VisuallyHidden>{/if}
 		</div>
 	</Tooltip>
 	{#if showsDisabledMessage}
 		<VisuallyHidden id={disabledMessageID}>{disabledMessage}</VisuallyHidden>
 	{/if}
+{/snippet}
+
+{#if inputGroup}
+	{@render control()}
+{:else}
+<Field
+	class={containerClass}
+	{label}
+	{isLabelHidden}
+	{description}
+	inputID={id}
+	descriptionID={description ? descriptionID : undefined}
+	{isOptional}
+	{isRequired}
+	{isDisabled}
+	{labelTooltip}
+	status={status
+		? { type: status.type, message: status.message, messageID: status.message ? statusMessageID : undefined }
+		: undefined}
+	{statusVariant}
+	{width}
+>
+	{@render control()}
 	{#if messagelessError}
 		<VisuallyHidden id={statusMessageID}>This field has an error</VisuallyHidden>
 	{/if}
 </Field>
+{/if}
 
 <style>
 	@layer astryx-base {
@@ -260,6 +287,8 @@
 		.control[data-status='error'] { border-color: var(--color-border-error); }
 		.control[data-status='success'] { border-color: var(--color-border-success); }
 
+		.in-group { flex: 1; min-width: 0; }
+		.in-group.disabled { opacity: 1; }
 		.disabled { cursor: default; opacity: 0.5; border-color: var(--color-border-emphasized); box-shadow: none; }
 		.disabled:focus-within { box-shadow: none; }
 

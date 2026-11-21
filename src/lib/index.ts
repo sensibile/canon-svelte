@@ -129,3 +129,52 @@ export type {
 	TimestampTooltipEntry
 } from './components/Timestamp/format.js';
 export { default as Token, type TokenColor, type TokenSize } from './components/Token/Token.svelte';
+
+// Form (step 4c)
+export { default as CheckboxList } from './components/CheckboxList/CheckboxList.svelte';
+export { default as CheckboxListItem } from './components/CheckboxList/CheckboxListItem.svelte';
+export { default as FileInput } from './components/FileInput/FileInput.svelte';
+export { default as CheckboxIndicator } from './components/Indicator/CheckboxIndicator.svelte';
+export { default as RadioIndicator } from './components/Indicator/RadioIndicator.svelte';
+export { default as InputGroup } from './components/InputGroup/InputGroup.svelte';
+export { default as InputGroupText } from './components/InputGroup/InputGroupText.svelte';
+export type { InputGroupSize } from './components/InputGroup/context.js';
+export { default as Item, type ItemAlign, type ItemDensity } from './components/Item/Item.svelte';
+export {
+	default as NumberInput,
+	type NumberInputEntryError,
+	type NumberInputSize
+} from './components/NumberInput/NumberInput.svelte';
+export { default as RadioList } from './components/RadioList/RadioList.svelte';
+export { default as RadioListItem } from './components/RadioList/RadioListItem.svelte';
+export type { RadioListSize } from './components/RadioList/context.js';
+export { default as Slider, type SliderMark, type SliderValue } from './components/Slider/Slider.svelte';
+export { default as TextArea, type TextAreaSize } from './components/TextArea/TextArea.svelte';
+export {
+	default as MultiSelector,
+	type MultiSelectorChange,
+	type MultiSelectorOptionData,
+	type MultiSelectorOptionType,
+	type MultiSelectorSelectedItem,
+	type MultiSelectorSize,
+	type MultiSelectorStatus,
+	type MultiSelectorVariant
+} from './components/MultiSelector/MultiSelector.svelte';
+export {
+	default as Selector,
+	type SelectorSize,
+	type SelectorStatus,
+	type SelectorVariant
+} from './components/Selector/Selector.svelte';
+export type {
+	IndicatorPosition,
+	SelectorDivider,
+	SelectorOptionData,
+	SelectorOptionType,
+	SelectorSection
+} from './components/Selector/options.js';
+export { default as Tokenizer, type TokenizerChange, type TokenizerSize } from './components/Tokenizer/Tokenizer.svelte';
+export { default as Typeahead, type TypeaheadSize } from './components/Typeahead/Typeahead.svelte';
+export { default as TypeaheadItem } from './components/Typeahead/TypeaheadItem.svelte';
+export { createStaticSource, type CreateStaticSourceOptions } from './components/Typeahead/createStaticSource.js';
+export type { SearchableItem, SearchContext, SearchSource } from './components/Typeahead/types.js';

@@ -8,6 +8,7 @@
 	import type { Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { anchorLayer, type LayerAlignment, type LayerPlacement } from '../../internal/position.js';
+	import { setInputGroupContext } from '../InputGroup/context.js';
 
 	interface Props extends HTMLAttributes<HTMLDivElement> {
 		open: boolean;
@@ -33,6 +34,8 @@
 		children,
 		...rest
 	}: Props = $props();
+	// Overlay content is not part of an enclosing InputGroup.
+	setInputGroupContext(null);
 
 	$effect(() => {
 		if (!open || !anchor || !element) return;
