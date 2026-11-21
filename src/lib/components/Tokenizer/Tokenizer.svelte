@@ -32,12 +32,13 @@
 	import Layer from '../Layer/Layer.svelte';
 	import VisuallyHidden from '../VisuallyHidden/VisuallyHidden.svelte';
 	import Tooltip from '../Tooltip/Tooltip.svelte';
+	import TypeaheadItem from '../Typeahead/TypeaheadItem.svelte';
 	import TypeaheadListbox from '../Typeahead/TypeaheadListbox.svelte';
 	import { SearchController } from '../Typeahead/searchController.svelte.js';
 	import type { SearchSource } from '../Typeahead/types.js';
 	import { pushLayer } from '../../internal/layerStack.js';
 	import { cssSize, type SizeValue } from '../../types.js';
-	import { getInputGroupContext, INPUT_GROUP_ITEM } from '../InputGroup/context.js';
+	import { getInputGroupContext, INPUT_GROUP_ITEM, setInputGroupContext } from '../InputGroup/context.js';
 
 	interface Props
 		extends Omit<HTMLInputAttributes, 'value' | 'size' | 'disabled' | 'onchange' | 'type' | 'placeholder'> {
@@ -129,6 +130,8 @@
 	const CREATE_PREFIX = '__astryx_tokenizer_create__';
 
 	const inputGroup = getInputGroupContext();
+	// Internal buttons (clear, steppers) belong to this control, not to the group row.
+	setInputGroupContext(null);
 	const isDisabled = $derived(isDisabledProp || (inputGroup?.isDisabled ?? false));
 	const size = $derived(sizeProp ?? inputGroup?.size ?? 'md');
 	const uid = $props.id();
@@ -461,7 +464,7 @@
 			{isEmpty}
 			{emptySearchText}
 			{size}
-			renderItem={renderItem && !createEntry ? renderItem : undefined}
+			renderItem={renderItem ? resultRow : undefined}
 			onselect={add}
 			onhover={(i) => {
 				isKeyboardHighlight = false;
@@ -469,6 +472,11 @@
 			}}
 		/>
 	</Layer>
+{/snippet}
+
+<!-- The synthetic create row always uses the default content; real results keep renderItem. -->
+{#snippet resultRow(item: T)}
+	{#if item === createEntry || !renderItem}<TypeaheadItem {item} />{:else}{@render renderItem(item)}{/if}
 {/snippet}
 
 {#if inputGroup}

@@ -54,7 +54,7 @@
 	} from '../Selector/options.js';
 	import type { LayerPlacement } from '../../internal/position.js';
 	import type { SizeValue } from '../../types.js';
-	import { getInputGroupContext } from '../InputGroup/context.js';
+	import { getInputGroupContext, setInputGroupContext } from '../InputGroup/context.js';
 
 	interface Props extends Omit<HTMLAttributes<HTMLButtonElement>, 'onchange' | 'placeholder'> {
 		label: string;
@@ -154,6 +154,8 @@
 	const CREATE_PREFIX = '__astryx_multi_selector_create__';
 
 	const inputGroup = getInputGroupContext();
+	// Internal buttons (clear, steppers) belong to this control, not to the group row.
+	setInputGroupContext(null);
 	const isDisabled = $derived(isDisabledProp || (inputGroup?.isDisabled ?? false));
 	const isEffectivelyReadOnly = $derived(isReadOnly && !isDisabled);
 	const size = $derived(sizeProp ?? inputGroup?.size ?? 'md');

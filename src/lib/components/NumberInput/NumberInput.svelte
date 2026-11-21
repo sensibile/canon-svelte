@@ -27,7 +27,7 @@
 	import Button from '../Button/Button.svelte';
 	import Tooltip from '../Tooltip/Tooltip.svelte';
 	import VisuallyHidden from '../VisuallyHidden/VisuallyHidden.svelte';
-	import { getInputGroupContext, INPUT_GROUP_ITEM } from '../InputGroup/context.js';
+	import { getInputGroupContext, INPUT_GROUP_ITEM, setInputGroupContext } from '../InputGroup/context.js';
 	import type { SizeValue } from '../../types.js';
 	import { formatEditableNumber } from './numberParser.js';
 	import {
@@ -125,6 +125,8 @@
 	}: Props = $props();
 
 	const inputGroup = getInputGroupContext();
+	// Internal buttons (clear, steppers) belong to this control, not to the group row.
+	setInputGroupContext(null);
 	const isDisabled = $derived(isDisabledProp || (inputGroup?.isDisabled ?? false));
 	const size = $derived(sizeProp ?? inputGroup?.size ?? 'md');
 	const uid = $props.id();
@@ -316,7 +318,9 @@
 				direction === 1 ? Math.floor(position + tolerance) + 1 : Math.ceil(position - tolerance) - 1;
 			next = base + nextPosition * effectiveStep;
 		}
-		next = Number(next.toFixed(Math.min(12, Math.max(decimalPlaces(effectiveStep), decimalPlaces(base)))));
+		// Round to the step/base grid's own precision (Astryx caps this at 12 places, which zeroes
+		// steps finer than 1e-12; toFixed's own limit is 100).
+		next = Number(next.toFixed(Math.min(100, Math.max(decimalPlaces(effectiveStep), decimalPlaces(base)))));
 		if (min != null) next = Math.max(min, next);
 		if (max != null) next = Math.min(max, next);
 		if (!Number.isFinite(next) || (isIntegerOnly && !Number.isInteger(next))) return current;

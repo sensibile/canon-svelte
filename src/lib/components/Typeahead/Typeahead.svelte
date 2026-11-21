@@ -30,7 +30,7 @@
 	import type { SearchableItem, SearchSource } from './types.js';
 	import { pushLayer } from '../../internal/layerStack.js';
 	import type { SizeValue } from '../../types.js';
-	import { getInputGroupContext, INPUT_GROUP_ITEM } from '../InputGroup/context.js';
+	import { getInputGroupContext, INPUT_GROUP_ITEM, setInputGroupContext } from '../InputGroup/context.js';
 
 	interface Props
 		extends Omit<HTMLInputAttributes, 'value' | 'size' | 'disabled' | 'onchange' | 'type' | 'placeholder'> {
@@ -106,6 +106,8 @@
 	}: Props = $props();
 
 	const inputGroup = getInputGroupContext();
+	// Internal buttons (clear, steppers) belong to this control, not to the group row.
+	setInputGroupContext(null);
 	const isDisabled = $derived(isDisabledProp || (inputGroup?.isDisabled ?? false));
 	const size = $derived(sizeProp ?? inputGroup?.size ?? 'md');
 	const uid = $props.id();
