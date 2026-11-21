@@ -1,8 +1,7 @@
 <!--
   Port of Astryx `TextInput` (packages/core/src/TextInput/TextInput.tsx), MIT, Meta Platforms, Inc.
   Use `bind:value`, or `value` + `onChange(value, event)` like Astryx.
-  Not yet ported: `labelTooltip`, `disabledMessage` and the "tooltip" status variant (need Tooltip),
-  InputGroup integration.
+  Not yet ported: the "tooltip" status variant, InputGroup integration.
 -->
 <script lang="ts" module>
 	export type TextInputType = 'text' | 'password' | 'email' | 'search' | 'tel' | 'url';
@@ -18,6 +17,7 @@
 	import Spinner from '../Spinner/Spinner.svelte';
 	import Button from '../Button/Button.svelte';
 	import VisuallyHidden from '../VisuallyHidden/VisuallyHidden.svelte';
+	import Tooltip from '../Tooltip/Tooltip.svelte';
 	import type { SizeValue } from '../../types.js';
 
 	interface Props
@@ -31,6 +31,10 @@
 		isRequired?: boolean;
 		isDisabled?: boolean;
 		isReadOnly?: boolean;
+		/** Why the input is disabled; shown in a tooltip on hover and focus while disabled. */
+		disabledMessage?: string;
+		/** Help text shown in an InfoTip next to the label. */
+		labelTooltip?: string;
 		startIcon?: IconName | IconComponent;
 		status?: FieldStatusInput;
 		statusVariant?: FieldStatusPlacement;
@@ -62,6 +66,8 @@
 		isRequired = false,
 		isDisabled = false,
 		isReadOnly = false,
+		disabledMessage,
+		labelTooltip,
 		startIcon,
 		status,
 		statusVariant = 'attached',
@@ -88,6 +94,8 @@
 	const id = $derived(idProp ?? `${uid}-input`);
 	const descriptionID = `${uid}-desc`;
 	const statusMessageID = `${uid}-status`;
+	const disabledMessageID = `${uid}-disabled-reason`;
+	const showsDisabledMessage = $derived(isDisabled && !!disabledMessage);
 	let inputEl: HTMLInputElement | undefined = $state();
 
 	const messagelessError = $derived(status?.type === 'error' && !status.message);
@@ -95,7 +103,8 @@
 		[
 			describedByProp,
 			description ? descriptionID : null,
-			status?.message || messagelessError ? statusMessageID : null
+			status?.message || messagelessError ? statusMessageID : null,
+			showsDisabledMessage ? disabledMessageID : null
 		]
 			.filter(Boolean)
 			.join(' ') || undefined
@@ -145,57 +154,63 @@
 	{isOptional}
 	{isRequired}
 	{isDisabled}
+	{labelTooltip}
 	status={status
 		? { type: status.type, message: status.message, messageID: status.message ? statusMessageID : undefined }
 		: undefined}
 	{statusVariant}
 	{width}
 >
-	<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
-	<div
-		class={['astryx-text-input', 'control', controlClass]}
-		class:disabled={isDisabled}
-		data-size={size}
-		data-status={status?.type}
-		data-disabled={isDisabled ? 'disabled' : undefined}
-		data-readonly={isReadOnly ? 'readonly' : undefined}
-		onclick={focusFromWrapper}
-	>
-		{#if startIcon}<Icon icon={startIcon} size="sm" color="secondary" />{/if}
-		<input
-			{...rest}
-			bind:this={inputEl}
-			{id}
-			name={isDisabled ? undefined : htmlName}
-			{type}
-			{value}
-			{placeholder}
-			spellcheck={hasSpellCheck}
-			readonly={isReadOnly || isDisabled || undefined}
-			aria-disabled={isDisabled ? 'true' : undefined}
-			aria-describedby={describedBy}
-			aria-required={isRequired && !isOptional ? 'true' : undefined}
-			aria-invalid={status?.type === 'error' ? 'true' : undefined}
-			aria-busy={isLoading || undefined}
-			data-autofocus={hasAutoFocus || undefined}
-			oninput={handleInput}
-			onkeydown={handleKeydown}
-		/>
-		{#if isLoading}<Spinner size="sm" aria-hidden="true" />{/if}
-		{#if hasClear && value !== '' && !isDisabled && !isReadOnly}
-			<Button
-				class="astryx-input-clear-button input-clear"
-				variant="ghost"
-				size="sm"
-				label="Clear {label}"
-				icon="close"
-				isIconOnly
-				onmousedown={(e) => e.preventDefault()}
-				onclick={clear}
+	<Tooltip content={disabledMessage ?? ''} isEnabled={showsDisabledMessage} focusTrigger="always">
+		<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+		<div
+			class={['astryx-text-input', 'control', controlClass]}
+			class:disabled={isDisabled}
+			data-size={size}
+			data-status={status?.type}
+			data-disabled={isDisabled ? 'disabled' : undefined}
+			data-readonly={isReadOnly ? 'readonly' : undefined}
+			onclick={focusFromWrapper}
+		>
+			{#if startIcon}<Icon icon={startIcon} size="sm" color="secondary" />{/if}
+			<input
+				{...rest}
+				bind:this={inputEl}
+				{id}
+				name={isDisabled ? undefined : htmlName}
+				{type}
+				{value}
+				{placeholder}
+				spellcheck={hasSpellCheck}
+				readonly={isReadOnly || isDisabled || undefined}
+				aria-disabled={isDisabled ? 'true' : undefined}
+				aria-describedby={describedBy}
+				aria-required={isRequired && !isOptional ? 'true' : undefined}
+				aria-invalid={status?.type === 'error' ? 'true' : undefined}
+				aria-busy={isLoading || undefined}
+				data-autofocus={hasAutoFocus || undefined}
+				oninput={handleInput}
+				onkeydown={handleKeydown}
 			/>
-		{/if}
-		{#if status}<Icon icon={status.type} size="md" color={status.type} />{/if}
-	</div>
+			{#if isLoading}<Spinner size="sm" aria-hidden="true" />{/if}
+			{#if hasClear && value !== '' && !isDisabled && !isReadOnly}
+				<Button
+					class="astryx-input-clear-button input-clear"
+					variant="ghost"
+					size="sm"
+					label="Clear {label}"
+					icon="close"
+					isIconOnly
+					onmousedown={(e) => e.preventDefault()}
+					onclick={clear}
+				/>
+			{/if}
+			{#if status}<Icon icon={status.type} size="md" color={status.type} />{/if}
+		</div>
+	</Tooltip>
+	{#if showsDisabledMessage}
+		<VisuallyHidden id={disabledMessageID}>{disabledMessage}</VisuallyHidden>
+	{/if}
 	{#if messagelessError}
 		<VisuallyHidden id={statusMessageID}>This field has an error</VisuallyHidden>
 	{/if}

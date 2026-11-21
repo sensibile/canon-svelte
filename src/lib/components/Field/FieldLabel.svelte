@@ -3,6 +3,7 @@
 	import type { HTMLAttributes } from 'svelte/elements';
 	import Icon, { type IconComponent } from '../Icon/Icon.svelte';
 	import type { IconName } from '../Icon/defaultIcons.js';
+	import InfoTip from '../InfoTip/InfoTip.svelte';
 
 	interface Props extends HTMLAttributes<HTMLElement> {
 		label: string;
@@ -14,6 +15,8 @@
 		isOptional?: boolean;
 		isRequired?: boolean;
 		labelIcon?: IconName | IconComponent;
+		/** Help text shown in an InfoTip next to the label. */
+		labelTooltip?: string;
 		description?: string;
 		descriptionID?: string;
 	}
@@ -28,6 +31,7 @@
 		isOptional = false,
 		isRequired = false,
 		labelIcon,
+		labelTooltip,
 		description,
 		descriptionID,
 		class: className,
@@ -64,9 +68,20 @@
 	</svelte:element>
 {/snippet}
 
+{#snippet labelWithHelp()}
+	{#if labelTooltip}
+		<span class="label-row" class:hidden-row={isLabelHidden}>
+			{@render labelEl()}
+			<InfoTip content={labelTooltip} label={`About ${label}`} class={isLabelHidden ? 'info-tip-hidden' : undefined} />
+		</span>
+	{:else}
+		{@render labelEl()}
+	{/if}
+{/snippet}
+
 {#if description}
 	<div class="label-group" class:hidden-group={isLabelHidden}>
-		{@render labelEl()}
+		{@render labelWithHelp()}
 		<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
 		<span
 			id={descriptionID}
@@ -77,12 +92,22 @@
 		>
 	</div>
 {:else}
-	{@render labelEl()}
+	{@render labelWithHelp()}
 {/if}
 
 <style>
 	@layer astryx-base {
 		.label-group { display: flex; flex-direction: column; }
+		.label-row { display: inline-flex; align-items: center; vertical-align: top; gap: var(--spacing-1); }
+		.hidden-row { display: contents; }
+		/* A hidden label's info button takes no space until it has keyboard focus. */
+		.label-row :global(.info-tip-hidden:not(:focus-visible)) {
+			position: absolute;
+			clip: rect(0, 0, 0, 0);
+			overflow: hidden;
+			white-space: nowrap;
+		}
+		.label-row :global(.info-tip-hidden) { align-self: flex-start; }
 		.hidden-group { display: contents; }
 		.label {
 			display: flex;

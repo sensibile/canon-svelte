@@ -29,6 +29,13 @@ Ported so far (props follow Astryx; see each file's header for what isn't ported
 - Action: `Button`, `IconButton`, `Link`
 - Layout: `Stack`, `HStack`, `VStack`, `Divider`
 - Form: `Field`, `FieldLabel`, `FieldStatus`, `TextInput`, `CheckboxInput`, `Switch`
+- Overlay: `Tooltip`, `InfoTip`, `Popover`, `Dialog`, `DialogHeader`, `DropdownMenu`
+  (`DropdownMenuItem`, `DropdownMenuGroup`, `DropdownMenuDivider`), `Toast` (`showToast`, `ToastViewport`)
+- Navigation: `TabList`, `Tab`
+
+Anchored overlays render in the browser top layer (the `popover` attribute) and are positioned with
+`@floating-ui/dom`. `Dialog` is a native `<dialog>`. Call `showToast({ body })` anywhere; mount a
+`ToastViewport` near the app root to choose the corner, or one is mounted on first use.
 
 Form controls support `bind:value` as well as Astryx's `value` + `onChange(value, event)`.
 Component styles live in `@layer astryx-base` and keep Astryx's `astryx-*` class names and `data-*`
