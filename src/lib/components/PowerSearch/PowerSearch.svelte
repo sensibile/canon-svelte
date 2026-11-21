@@ -8,8 +8,9 @@
   `createPowerSearchConfig(definitions)` builds a config, and an `applyFilters`, from typed fields.
   `focusTypeahead()` and `blurTypeahead()` move focus to and from the field (bind:this).
   `onFocus` and `onBlur` fire as focus enters and leaves the field.
-  Port changes (marked "Port change"): a read-only field takes no new filters, and each opening
-  of the editor starts from the new pick, and an editor whose filter moves or goes away closes.
+  Port changes (marked "Port change"): a read-only field takes no new filters, each opening
+  of the editor starts from the new pick, an editor whose filter moves or goes away closes, and
+  disabling the field closes an open editor.
   Not yet ported: the bottom-sheet presentation on touch, token overflow behaviors, the nested
   (group) editor, group headings in the results, translations (English only).
 -->
@@ -282,6 +283,8 @@
 
 	function handlePopoverSave(savedFilter: PowerSearchFilter | null) {
 		const state = popoverState;
+		// Port change: a disabled PowerSearch never changes its filters.
+		if (isDisabled) return closeQuietly();
 		if (state.type === 'adding') {
 			if (savedFilter) onChange([...filters, savedFilter], 'add', filters.length);
 		} else if (state.type === 'editing') {
@@ -306,13 +309,21 @@
 
 	// Port change: removing tokens (or any change to `filters`) can shift the edited filter's index;
 	// close the editor rather than apply or delete at a stale index.
+	function closeQuietly() {
+		cancelAnimationFrame(showFrame);
+		isPopoverShown = false;
+		popoverState = { type: 'idle' };
+	}
 	$effect(() => {
 		const state = popoverState;
 		if (state.type !== 'editing') return;
 		if (filters[state.filterIndex] === editingTarget) return;
-		cancelAnimationFrame(showFrame);
-		isPopoverShown = false;
-		popoverState = { type: 'idle' };
+		closeQuietly();
+	});
+
+	// Port change: disabling PowerSearch closes an open editor, so it can't change the filters.
+	$effect(() => {
+		if (isDisabled && popoverState.type !== 'idle') closeQuietly();
 	});
 
 	// Light dismiss: a press outside the popover and the field closes it without moving focus;
