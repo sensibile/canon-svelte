@@ -65,7 +65,12 @@
 		if (!root) return;
 		const sync = () => {
 			const items = [...root.querySelectorAll<HTMLElement>(`[${INPUT_GROUP_ITEM}]`)].filter(
-				(el) => el.closest('.astryx-input-group') === root && !el.closest('[popover], dialog, template')
+				(el) => {
+					if (el.closest('.astryx-input-group') !== root) return false;
+					// Skip members inside an overlay nested in the group, but not when the whole group sits in one.
+					const overlay = el.closest('[popover], dialog, template');
+					return !(overlay && overlay !== root && root.contains(overlay));
+				}
 			);
 			items.forEach((el, i) => {
 				el.toggleAttribute('data-group-first', i === 0);

@@ -336,9 +336,9 @@ export function parseLocaleNumber(
   const scaled =
     exponent === 0
       ? magnitude
-      : // 1.23 * 1e3 is 1229.9999999999998 in binary floating point, and a
-        // field that commits that instead of 1230 has not round-tripped.
-        Number((magnitude * 10 ** exponent).toPrecision(15));
+      : // Parse mantissa and exponent as one decimal literal: correctly rounded, so 1.23e3
+        // is 1230 (not 1229.9999999999998) and no significant digits are dropped.
+        Number(`${plain}e${exponent}`);
   if (!Number.isFinite(scaled)) {
     return null;
   }

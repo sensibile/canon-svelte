@@ -235,6 +235,13 @@
 		onChange?.(next, { item, type: 'remove' });
 		announcement = `Removed ${item.label}`;
 		inputEl?.focus();
+		refreshResults();
+	}
+
+	/** After a removal, re-run the current search so removed items can be offered again. */
+	function refreshResults() {
+		if (isDisabled || document.activeElement !== inputEl) return;
+		if (search.isOpen || (query === '' && hasEntriesOnFocus)) queueMicrotask(() => search.openFor(query));
 	}
 
 	function clearAll() {
@@ -244,6 +251,7 @@
 		onChange?.([], { item: last, type: 'remove' });
 		announcement = 'All items removed';
 		inputEl?.focus();
+		refreshResults();
 	}
 
 	function onKeydown(e: KeyboardEvent & { currentTarget: EventTarget & HTMLInputElement }) {

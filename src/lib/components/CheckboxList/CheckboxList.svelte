@@ -96,13 +96,14 @@
 		if (!group) return;
 		const boxes = [...group.querySelectorAll<HTMLInputElement>('input[type="checkbox"][data-checkbox-list-item]')];
 		const isEmpty = !boxes.some((b) => b.checked);
-		const target = isRequired && isEmpty ? boxes.find((b) => !b.disabled && !b.readOnly && !b.hasAttribute('aria-readonly')) : undefined;
+		const target = isRequired && !isOptional && isEmpty ? boxes.find((b) => !b.disabled && !b.readOnly && !b.hasAttribute('aria-readonly')) : undefined;
 		for (const b of boxes) b.required = b === target;
 	}
 	$effect(() => {
 		const root = group;
 		void value;
 		void isRequired;
+		void isOptional;
 		if (!root) return;
 		tick().then(syncRequired);
 		const observer = new MutationObserver(syncRequired);
