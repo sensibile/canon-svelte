@@ -32,6 +32,7 @@
 	import Calendar from '../Calendar/Calendar.svelte';
 	import { createDateDisabledCheck } from '../Calendar/calendarDays.js';
 	import DatePopover from '../DateInput/DatePopover.svelte';
+	import { pushLayer } from '../../internal/layerStack.js';
 	import { TypedDateField, type DateInputEntryError, type EntryErrorBehavior } from '../DateInput/typedDate.svelte.js';
 	import { TypedTimeField } from '../TimeInput/typedTime.svelte.js';
 	import type { DayOfWeek, DayOfWeekName, ISODateString } from '../../internal/date/dateTypes.js';
@@ -396,6 +397,12 @@
 		const i = activeTimeIndex;
 		if (!isTimeOpen || i < 0 || !timeListEl) return;
 		timeListEl.querySelector(`#${CSS.escape(timeOptionId(i))}`)?.scrollIntoView({ block: 'nearest' });
+	});
+	// The open list is the top layer, so Escape closes it alone and not an enclosing popover.
+	$effect(() => {
+		if (!isTimeOpen) return;
+		const layer = pushLayer();
+		return () => layer.remove();
 	});
 	// A press outside the time segment and its list closes the list.
 	$effect(() => {
