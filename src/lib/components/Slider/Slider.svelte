@@ -44,6 +44,8 @@
 		valueDisplay?: 'tooltip' | 'text' | 'none';
 		marks?: SliderMark[];
 		htmlName?: string;
+		/** The id of a form outside this one that the hidden inputs belong to. */
+		form?: string;
 		/** Range only: the smallest gap between the thumbs, in steps. */
 		minStepsBetweenThumbs?: number;
 		containerClass?: string;
@@ -71,6 +73,7 @@
 		valueDisplay = 'tooltip',
 		marks,
 		htmlName,
+		form,
 		minStepsBetweenThumbs = 0,
 		containerClass,
 		class: className,
@@ -308,7 +311,7 @@
 		style:--_mark-label-offset="{MARK_LABEL_OFFSET}px"
 	>
 		{#if htmlName != null && !isDisabled}
-			{#each values as v, i (i)}<input type="hidden" name={htmlName} value={String(v)} />{/each}
+			{#each values as v, i (i)}<input type="hidden" name={htmlName} {form} value={String(v)} />{/each}
 		{/if}
 		<Tooltip content={disabledMessage ?? ''} isEnabled={showsDisabledMessage} focusTrigger="always">
 			<div

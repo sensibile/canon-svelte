@@ -99,6 +99,8 @@
 		isDefaultOpen?: boolean;
 		/** The `name` of the hidden inputs carrying the values, for form submission. */
 		htmlName?: string;
+		/** The id of a form outside this one that the hidden inputs belong to. */
+		form?: string;
 		containerClass?: string;
 		controlClass?: string;
 	}
@@ -141,6 +143,7 @@
 		placement = 'below',
 		isDefaultOpen = false,
 		htmlName,
+		form,
 		containerClass,
 		controlClass,
 		id: idProp,
@@ -585,7 +588,7 @@
 
 {#snippet hiddenInputs()}
 	{#if htmlName != null && !isDisabled}
-		{#each value as v (v)}<input type="hidden" name={htmlName} value={v} />{/each}
+		{#each value as v (v)}<input type="hidden" name={htmlName} {form} value={v} />{/each}
 	{/if}
 {/snippet}
 

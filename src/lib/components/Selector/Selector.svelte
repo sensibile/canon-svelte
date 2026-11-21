@@ -82,6 +82,8 @@
 		isDefaultOpen?: boolean;
 		/** The `name` of a hidden input carrying the value, for form submission. */
 		htmlName?: string;
+		/** The id of a form outside this one that the hidden inputs belong to. */
+		form?: string;
 		containerClass?: string;
 		controlClass?: string;
 	}
@@ -118,6 +120,7 @@
 		placement = 'below',
 		isDefaultOpen = false,
 		htmlName,
+		form,
 		containerClass,
 		controlClass,
 		id: idProp,
@@ -445,7 +448,7 @@
 {/snippet}
 
 {#snippet hiddenInput()}
-	{#if htmlName != null && !isDisabled}<input type="hidden" name={htmlName} value={value ?? ''} />{/if}
+	{#if htmlName != null && !isDisabled}<input type="hidden" name={htmlName} {form} value={value ?? ''} />{/if}
 {/snippet}
 
 <SelectorShell
