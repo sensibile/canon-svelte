@@ -109,8 +109,20 @@
 			return;
 		}
 		if (t.closest('button, a, input, select, textarea')) return;
-		if (href != null) actionEl?.click();
-		else onclick?.(e);
+		if (href != null) {
+			// Re-dispatch with the original modifiers so Ctrl/Cmd/Shift-click keep their link meaning.
+			actionEl?.dispatchEvent(
+				new MouseEvent('click', {
+					bubbles: true,
+					cancelable: true,
+					ctrlKey: e.ctrlKey,
+					metaKey: e.metaKey,
+					shiftKey: e.shiftKey,
+					altKey: e.altKey,
+					button: e.button
+				})
+			);
+		} else onclick?.(e);
 	}
 </script>
 

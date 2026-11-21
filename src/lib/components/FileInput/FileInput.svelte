@@ -69,6 +69,7 @@
 		controlClass,
 		id: idProp,
 		'aria-describedby': callerDescribedBy,
+		form: formProp,
 		...rest
 	}: Props = $props();
 
@@ -287,7 +288,7 @@
 				type="file"
 				{accept}
 				multiple={isMultiple}
-				form={isDisabled ? '' : undefined}
+				form={isDisabled ? '' : formProp}
 				aria-hidden="true"
 				tabindex={-1}
 				class="hidden-input"
