@@ -15,12 +15,14 @@
 		icon?: Snippet;
 	}
 
-	let { variant, label, isPulsing = false, tooltip, icon, class: className, ...rest }: Props = $props();
+	let { variant, label, isPulsing = false, tooltip, icon, class: className, tabindex, ...rest }: Props = $props();
 </script>
 
 {#snippet dot()}
+	<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 	<span
 		{...rest}
+		tabindex={tooltip && tabindex == null ? 0 : tabindex}
 		role="img"
 		aria-label={label}
 		class={['astryx-status-dot', 'dot', className]}
