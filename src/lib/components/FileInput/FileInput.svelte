@@ -172,6 +172,24 @@
 		}
 	}
 
+	// Keep the native input's FileList equal to the accepted selection, so a named FileInput
+	// submits what it shows (including dropped files and after validation drops some).
+	function syncNativeFiles() {
+		if (!inputEl) return;
+		try {
+			const dt = new DataTransfer();
+			for (const f of files) dt.items.add(f);
+			inputEl.files = dt.files;
+		} catch {
+			// No DataTransfer constructor (very old browsers): fall back to resetting the input.
+			inputEl.value = '';
+		}
+	}
+	$effect(() => {
+		void files;
+		syncNativeFiles();
+	});
+
 	function openPicker() {
 		if (!isSelectionDisabled) inputEl?.click();
 	}
@@ -279,7 +297,7 @@
 				}}
 				onchange={(e) => {
 					handleFiles(Array.from(e.currentTarget.files ?? []));
-					e.currentTarget.value = '';
+					syncNativeFiles();
 				}}
 			/>
 			{#if isDropzone}

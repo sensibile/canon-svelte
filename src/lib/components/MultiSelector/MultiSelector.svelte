@@ -617,6 +617,7 @@
 	{onControlClick}
 	onDismiss={() => hide()}
 	activeOptionId={activeDescendant}
+	{triggerId}
 	{announcement}
 	search={hasSearch
 		? {
@@ -626,7 +627,8 @@
 				isRequired: isEffectivelyRequired,
 				activeDescendant,
 				oninput: setQuery,
-				onkeydown: onSearchKeydown
+				onkeydown: onSearchKeydown,
+				ondismiss: () => hide()
 			}
 		: null}
 	trigger={triggerButton}

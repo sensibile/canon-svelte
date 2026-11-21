@@ -69,6 +69,14 @@
 	const isCheckedRow = $derived(resolved === true && !isDisabled && !isReadOnly);
 	const hasDescription = $derived(description != null && description !== '');
 	let input: HTMLInputElement | undefined = $state();
+	// Per-item (isChecked + onCheck) state changes don't touch the group's value or fire `change`,
+	// so tell the group to recompute which box carries `required` once this one has rendered.
+	$effect(() => {
+		void resolved;
+		void isDisabled;
+		void isReadOnly;
+		ctx?.itemChanged();
+	});
 
 	function toggle() {
 		if (isDisabled || isReadOnly || isLoading) return;

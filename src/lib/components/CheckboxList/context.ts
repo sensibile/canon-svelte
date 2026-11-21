@@ -12,6 +12,8 @@ export interface CheckboxListContext {
 	readonly density: ItemDensity;
 	readonly hasDividers: boolean;
 	toggle(value: string): void;
+	/** Items call this after their checked/disabled state renders, so the group's required target stays right. */
+	itemChanged(): void;
 }
 
 const KEY = Symbol('astryx-checkbox-list');

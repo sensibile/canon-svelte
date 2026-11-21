@@ -85,6 +85,9 @@
 			const next = value.includes(v) ? value.filter((x) => x !== v) : [...value, v];
 			value = next;
 			onChange?.(next);
+		},
+		itemChanged() {
+			syncRequired();
 		}
 	});
 

@@ -94,11 +94,9 @@ export class SearchController<T extends SearchableItem> {
 	/** Call on every query edit. */
 	queryChanged(query: string) {
 		const { debounceMs, minQueryLength, hasEntriesOnFocus, announce } = this.#options();
-		clearTimeout(this.#timer);
-		this.#timer = undefined;
-		this.isDebouncing = false;
+		// Invalidate any in-flight answer right away so a late reply for the old query is dropped.
+		this.#cancelPending();
 		if ((query === '' && !hasEntriesOnFocus) || isBelowMinQueryLength(query, minQueryLength)) {
-			this.#cancelPending();
 			this.results = [];
 			this.highlightedIndex = -1;
 			this.hasSearched = false;
@@ -129,16 +127,17 @@ export class SearchController<T extends SearchableItem> {
 		void this.#run(query);
 	}
 
+	/** Dismisses the list and drops any pending search so it can't reopen it. */
 	close() {
+		this.#cancelPending();
+		this.isLoading = false;
 		this.isOpen = false;
 		this.highlightedIndex = -1;
 	}
 
 	/** Closes and forgets results, e.g. after a pick. */
 	reset() {
-		this.#cancelPending();
 		this.results = [];
-		this.isLoading = false;
 		this.hasSearched = false;
 		this.close();
 	}

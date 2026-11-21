@@ -31,6 +31,8 @@
 		activeDescendant: string | undefined;
 		oninput: (value: string) => void;
 		onkeydown: (e: KeyboardEvent) => void;
+		/** Closes the list, e.g. when Tab leaves the search row's clear button. */
+		ondismiss: () => void;
 	}
 </script>
 
@@ -87,6 +89,8 @@
 		activeOptionId?: string;
 		announcement: string;
 		search?: SelectorShellSearch | null;
+		/** The trigger's resolved id (a consumer `id` or the generated one), for the label's `for`. */
+		triggerId: string;
 		trigger: Snippet;
 		listbox: Snippet;
 		/** Extra hidden content inside the control, such as form inputs. */
@@ -98,6 +102,7 @@
 
 	let {
 		uid,
+		triggerId,
 		kind,
 		label,
 		isLabelHidden,
@@ -271,6 +276,24 @@
 							oninput={(e) => search.oninput(e.currentTarget.value)}
 							onkeydown={(e) => search.onkeydown(e)}
 						/>
+						{#if search.query}
+							<!-- Forward Tab from the search input lands here (the list stays open); Tab past it closes. -->
+							<Button
+								class="search-clear"
+								variant="ghost"
+								size="sm"
+								label="Clear search"
+								icon="close"
+								isIconOnly
+								onclick={() => {
+									search.oninput('');
+									searchInput?.focus();
+								}}
+								onkeydown={(e: KeyboardEvent) => {
+									if (e.key === 'Tab' && !e.shiftKey) search.ondismiss();
+								}}
+							/>
+						{/if}
 					</div>
 					<Divider />
 					<div class="listbox-wrap" class:input={variant === 'input'}>{@render listbox()}</div>
@@ -290,7 +313,7 @@
 		{label}
 		{isLabelHidden}
 		{description}
-		inputID={ids.trigger}
+		inputID={triggerId}
 		labelID={ids.fieldLabel}
 		descriptionID={description ? ids.description : undefined}
 		{isOptional}
