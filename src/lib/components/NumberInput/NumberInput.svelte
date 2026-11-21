@@ -500,7 +500,7 @@
 				onkeydown={handleKeydown}
 			/>
 			{#if htmlName && !isDisabled && (formatValue || isDraftKeptAtBlur)}
-				<input type="hidden" name={htmlName} value={hiddenFormValue} />
+				<input type="hidden" name={htmlName} form={rest.form} value={hiddenFormValue} />
 			{/if}
 			{#if units}<span id={unitsID} class="units">{units}</span>{/if}
 			<VisuallyHidden role="alert" aria-live="assertive">{alertMessage}</VisuallyHidden>
