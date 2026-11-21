@@ -102,6 +102,7 @@
 		onkeydown: onkeydownProp,
 		'aria-describedby': describedByProp,
 		'aria-labelledby': labelledByProp,
+		name,
 		...rest
 	}: Props = $props();
 
@@ -219,6 +220,8 @@
 		if (!open) {
 			if (e.key === 'Escape') {
 				if (search.isPending) {
+					// Consume the key so an enclosing form Dialog doesn't also close.
+					e.preventDefault();
 					search.reset();
 					return;
 				}
@@ -344,6 +347,10 @@
 							aria-describedby={describedBy}
 						/>
 					</span>
+				{/if}
+				{#if name != null && !isDisabled}
+					<!-- The search draft isn't the field's value: submit the picked item's id under `name`. -->
+					<input type="hidden" {name} value={value?.id ?? ''} />
 				{/if}
 				<input
 					{...rest}

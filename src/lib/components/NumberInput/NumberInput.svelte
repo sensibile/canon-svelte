@@ -181,6 +181,7 @@
 		untrack(() => {
 			if (shownRejection !== null && pendingInput !== null) {
 				shownRejection = toEntryError(pendingInput, getNumberInputRejection(pendingInput, r));
+				reportEntryError(shownRejection);
 			}
 		});
 	});

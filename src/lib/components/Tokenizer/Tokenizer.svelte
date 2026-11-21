@@ -264,7 +264,10 @@
 			return;
 		}
 		if (!open) {
-			if (e.key === 'Escape' && search.isPending) search.reset();
+			if (e.key === 'Escape' && search.isPending) {
+				e.preventDefault();
+				search.reset();
+			}
 			else if (e.key === 'ArrowDown' && (hasEntriesOnFocus || query.length > 0)) {
 				e.preventDefault();
 				search.openFor(query);
