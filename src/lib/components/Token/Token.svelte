@@ -88,9 +88,18 @@
 		e.preventDefault();
 		e.stopPropagation();
 	}
+	const INTERACTIVE = 'a[href], button, input, select, textarea, summary, label, [role="button"], [role="link"], [tabindex]';
+	/** True when the press landed on a control inside the chip (not the chip itself). */
+	function isNestedControl(target: EventTarget | null, root: EventTarget | null): boolean {
+		if (!(root instanceof Element)) return false;
+		for (let el = target instanceof Element ? target : null; el && el !== root; el = el.parentElement) {
+			if (el.matches(INTERACTIVE)) return true;
+		}
+		return false;
+	}
 	/** Clicking the chip body (not a nested control) activates the label link/button. */
 	function onContainerClick(e: MouseEvent) {
-		if (isDisabled || !labelEl || (e.target as HTMLElement).closest('button, a')) return;
+		if (isDisabled || !labelEl || isNestedControl(e.target, e.currentTarget)) return;
 		// Re-dispatch with the original modifiers so Ctrl/Cmd/Shift-click keep their link meaning.
 		labelEl.dispatchEvent(
 			new MouseEvent('click', {

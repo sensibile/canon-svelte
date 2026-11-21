@@ -200,7 +200,7 @@
 			role={consumerRole ?? (accessibleName ? 'img' : 'presentation')}
 			aria-label={consumerAriaLabel ?? accessibleName}
 			aria-hidden={accessibleName || consumerAriaLabel ? undefined : 'true'}
-			tabindex={tooltipText && !group ? 0 : undefined}
+			tabindex={rest.tabindex ?? (tooltipText && !group ? 0 : undefined)}
 		>
 			{@render visual()}
 		</div>
