@@ -198,3 +198,10 @@ export {
 	type DateRangeInputSize,
 	type DateRangePreset
 } from './components/DateRangeInput/DateRangeInput.svelte';
+export {
+	default as TimeInput,
+	type TimeInputHourFormat,
+	type TimeInputSize
+} from './components/TimeInput/TimeInput.svelte';
+export type { TimeInputEntryError } from './components/TimeInput/typedTime.svelte.js';
+export type { ISOTimeString } from './internal/date/timeParser.js';
