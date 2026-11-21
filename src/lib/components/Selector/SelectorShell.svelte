@@ -277,7 +277,7 @@
 							onkeydown={(e) => search.onkeydown(e)}
 						/>
 						{#if search.query}
-							<!-- Forward Tab from the search input lands here (the list stays open); Tab past it closes. -->
+							<!-- Forward Tab from the search input lands here (the list stays open); Tab past it or Escape closes. -->
 							<Button
 								class="search-clear"
 								variant="ghost"
@@ -291,6 +291,10 @@
 								}}
 								onkeydown={(e: KeyboardEvent) => {
 									if (e.key === 'Tab' && !e.shiftKey) search.ondismiss();
+									else if (e.key === 'Escape') {
+										e.preventDefault();
+										search.ondismiss();
+									}
 								}}
 							/>
 						{/if}
