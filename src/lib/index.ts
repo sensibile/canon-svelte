@@ -213,3 +213,66 @@ export {
 	type DateTimeInputTimeOptionInterval,
 	type ISODateTimeString
 } from './components/DateTimeInput/DateTimeInput.svelte';
+export { default as PowerSearch, type PowerSearchSize } from './components/PowerSearch/PowerSearch.svelte';
+export { default as PowerSearchToken } from './components/PowerSearch/PowerSearchToken.svelte';
+export { default as PowerSearchFilterEditor } from './components/PowerSearch/PowerSearchFilterEditor.svelte';
+export { resolveOperatorLabel } from './components/PowerSearch/resolveOperatorLabel.js';
+export {
+	createPowerSearchConfig,
+	type FieldDefinition,
+	type InferData
+} from './components/PowerSearch/powerSearchConfig.js';
+export type {
+	PowerSearchConfig,
+	PowerSearchField,
+	PowerSearchOperator,
+	PowerSearchOperatorBase,
+	PowerSearchOperatorWithLabel,
+	PowerSearchOperatorWithI18nKey,
+	OperatorValue,
+	EmptyOperatorValue,
+	StringOperatorValue,
+	StringListOperatorValue,
+	IntegerOperatorValue,
+	FloatOperatorValue,
+	TimeOperatorValue,
+	DateAbsoluteOperatorValue,
+	DateRelativeOperatorValue,
+	DateRangeOperatorValue,
+	EnumOperatorValue,
+	EnumListOperatorValue,
+	EntityListOperatorValue,
+	CustomOperatorValue,
+	CustomEditorProps,
+	NestedOperatorValue,
+	FilterValue,
+	FilterValueEmpty,
+	FilterValueString,
+	FilterValueStringList,
+	FilterValueInteger,
+	FilterValueFloat,
+	FilterValueTime,
+	FilterValueDateAbsolute,
+	FilterValueDateRelative,
+	FilterValueDateRange,
+	FilterValueEnum,
+	FilterValueEnumList,
+	FilterValueEntityList,
+	FilterValueCustom,
+	FilterValueNested,
+	PowerSearchFilter,
+	PartialFilter,
+	EnumItem,
+	PowerSearchEntity,
+	PowerSearchIcon,
+	DateTimeRange,
+	DateTimeRangePart,
+	DateRangeFilterPreset,
+	RelativeDateFilterPreset,
+	OperatorTokenizationConfig,
+	PowerSearchChangeType,
+	PowerSearchTokenProps,
+	PowerSearchEditorProps,
+	PowerSearchComponentOverride,
+	PowerSearchComponents
+} from './components/PowerSearch/types.js';
