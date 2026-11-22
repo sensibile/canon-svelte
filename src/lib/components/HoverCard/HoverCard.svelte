@@ -89,6 +89,7 @@
 	import type { ClassValue } from 'svelte/elements';
 	import Layer from '../Layer/Layer.svelte';
 	import { observeChildren } from '../../internal/observeChildren.js';
+	import { readModality } from '../../internal/modality.js';
 	import { pushLayer } from '../../internal/layerStack.js';
 	import type { LayerAlignment, LayerPlacement } from '../../internal/position.js';
 
@@ -291,6 +292,8 @@
 	function onfocusin(e: FocusEvent) {
 		focusCounted = isFocusForTrigger(e.target);
 		if (!focusCounted || !isEnabled) return;
+		// Keyboard navigation after a tap ends the touch suppression; focus from the tap itself stays suppressed.
+		if (readModality() === 'keyboard') isTouchPointer = false;
 		if (isTouchPointer) return;
 		if (isEscapeDismissing) {
 			isEscapeDismissing = false;

@@ -200,10 +200,9 @@
 			// A non-modal drawer has no native cancel; Escape goes to the topmost layer.
 			const onKey = (e: KeyboardEvent) => {
 				if (e.key !== 'Escape' || e.defaultPrevented || !layer.isTop()) return;
-				if (purpose !== 'required') {
-					e.preventDefault();
-					onOpenChange(false);
-				}
+				// Consume it even when required, so an enclosing modal doesn't close instead.
+				e.preventDefault();
+				if (purpose !== 'required') onOpenChange(false);
 			};
 			el.ownerDocument.addEventListener('keydown', onKey);
 			cleanups.push(() => el.ownerDocument.removeEventListener('keydown', onKey));
