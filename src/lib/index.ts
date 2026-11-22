@@ -17,6 +17,16 @@ export {
 } from './components/CheckboxInput/CheckboxInput.svelte';
 export { default as Dialog, type DialogPurpose, type DialogVariant } from './components/Dialog/Dialog.svelte';
 export { default as DialogHeader } from './components/Dialog/DialogHeader.svelte';
+export { default as AlertDialog } from './components/AlertDialog/AlertDialog.svelte';
+export { default as Drawer } from './components/Drawer/Drawer.svelte';
+export { default as DrawerHeader } from './components/Drawer/DrawerHeader.svelte';
+export {
+	default as Overlay,
+	type OverlayScrimMode,
+	type OverlayPosition,
+	type OverlayAlign,
+	type OverlayShowOn
+} from './components/Overlay/Overlay.svelte';
 export { default as Divider } from './components/Divider/Divider.svelte';
 export { default as DropdownMenu } from './components/DropdownMenu/DropdownMenu.svelte';
 export { default as DropdownMenuItem } from './components/DropdownMenu/DropdownMenuItem.svelte';
