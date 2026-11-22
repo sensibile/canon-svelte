@@ -11,7 +11,7 @@
   and holding input during the entrance.
 -->
 <script lang="ts">
-	import type { Snippet } from 'svelte';
+	import { untrack, type Snippet } from 'svelte';
 	import type { HTMLDialogAttributes } from 'svelte/elements';
 	import { cssSize, spacingVar, type SizeValue, type SpacingStep } from '../../types.js';
 	import type { DialogPurpose } from '../Dialog/Dialog.svelte';
@@ -103,7 +103,15 @@
 			}
 			return;
 		}
-		if (!isHostOpen(el)) return;
+		if (!isHostOpen(el)) {
+			// Closed natively (a <form method="dialog">): finish without an exit slide.
+			if (untrack(() => isRendered)) {
+				isRendered = false;
+				if (opener?.isConnected) opener.focus({ preventScroll: true });
+				opener = null;
+			}
+			return;
+		}
 		return waitForExit(el, () => {
 			hideHost(el);
 			isRendered = false;
@@ -173,7 +181,8 @@
 		const cleanups: (() => void)[] = [() => layer.remove()];
 		if (hasScrim) {
 			cleanups.push(lockScroll(el.ownerDocument));
-			cleanups.push(trapFocus(el));
+			// A modal opened inside the drawer owns Tab while it's on top.
+			cleanups.push(trapFocus(el, () => layer.isTop()));
 		} else {
 			// A non-modal drawer has no native cancel; Escape goes to the topmost layer.
 			const onKey = (e: KeyboardEvent) => {
@@ -186,6 +195,12 @@
 			el.ownerDocument.addEventListener('keydown', onKey);
 			cleanups.push(() => el.ownerDocument.removeEventListener('keydown', onKey));
 		}
+		// A <form method="dialog"> closes the element natively; tell the owner.
+		const onClose = () => {
+			if (isOpen) onOpenChange(false);
+		};
+		el.addEventListener('close', onClose);
+		cleanups.push(() => el.removeEventListener('close', onClose));
 		return () => cleanups.forEach((fn) => fn());
 	});
 
@@ -264,7 +279,7 @@
 		@media (max-width: 640px) {
 			.drawer { width: var(--_drawer-mobile-width); }
 		}
-		.rendered { display: flex; }
+		.rendered:is([open], :popover-open) { display: flex; }
 		.drawer[data-side='end'] {
 			inset-inline: auto 0;
 			border-inline-start: var(--border-width) solid var(--color-border);

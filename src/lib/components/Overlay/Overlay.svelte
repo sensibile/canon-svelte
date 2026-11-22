@@ -5,6 +5,8 @@
   `isOpen` controls it instead (a closed overlay is inert). `position` fills the area or slides in a
   bar from the bottom or top; `align` places the content. On devices without hover, a tap that
   doesn't land on a control toggles a hover overlay. The container takes its first child's radius.
+  Port change: a focus- or hover-revealed overlay over nothing focusable makes its container a tab
+  stop, so keyboard users can reveal its actions.
   Not yet ported: the useOverlay hook, and the media theme's dark-page attribute.
 -->
 <script lang="ts" module>
@@ -17,6 +19,8 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
+	import { focusables } from '../../internal/focus.js';
+	import { observeChildren } from '../../internal/observeChildren.js';
 
 	interface Props extends HTMLAttributes<HTMLDivElement> {
 		/** What the overlay lays over. */
@@ -62,6 +66,18 @@
 		isControlled ? (effectiveIsOpen ? 'visible' : 'hidden') : showOn === 'always' ? 'visible' : showOn === 'focus' ? 'focus' : 'hover'
 	);
 
+	// Port change: when the overlay waits for focus and nothing under it can take focus, the
+	// container becomes the tab stop, so keyboard users can reveal and reach the overlay's actions.
+	let hasFocusableChild = $state(true);
+	$effect(() => {
+		const el = container;
+		if (!el) return;
+		return observeChildren(el, () => {
+			hasFocusableChild = focusables(el).some((f) => !f.closest('.astryx-overlay-scrim'));
+		});
+	});
+	const needsTabStop = $derived((reveal === 'hover' || reveal === 'focus') && !hasFocusableChild);
+
 	// Take the first child's corner radius so the scrim follows rounded media.
 	$effect(() => {
 		const el = container;
@@ -84,7 +100,14 @@
 </script>
 
 <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
-<div {...rest} bind:this={container} class={['astryx-overlay', 'overlay', className]} onclick={handleClick}>
+<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+<div
+	{...rest}
+	bind:this={container}
+	tabindex={rest.tabindex ?? (needsTabStop ? 0 : undefined)}
+	class={['astryx-overlay', 'overlay', className]}
+	onclick={handleClick}
+>
 	{@render children?.()}
 	<div
 		class="astryx-overlay-scrim scrim"
@@ -105,6 +128,10 @@
 <style>
 	@layer astryx-base {
 		.overlay { position: relative; overflow: clip; }
+		.overlay:focus-visible {
+			outline: var(--focus-outline-width) var(--focus-outline-style) var(--focus-outline-color);
+			outline-offset: var(--focus-outline-offset);
+		}
 		.scrim {
 			position: absolute;
 			display: flex;

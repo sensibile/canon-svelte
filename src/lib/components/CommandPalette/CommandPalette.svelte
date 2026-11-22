@@ -5,11 +5,12 @@
   footer of keyboard hints. Arrow keys and Page Up/Down move the highlight, Enter or a click picks
   the item (it becomes `value`) and closes; Escape or a backdrop press closes. While a search runs,
   the current results are filtered by label and a spinner shows; the result count is announced.
+  Port change: closing it by setting `isOpen` to false also resets the query.
   Not yet ported: `isInline`, the delayed "Loading" announcement, and React transitions (a newer
   query simply supersedes an older one).
 -->
 <script lang="ts" generics="T extends SearchableItem = SearchableItem">
-	import type { Snippet } from 'svelte';
+	import { untrack, type Snippet } from 'svelte';
 	import type { HTMLDialogAttributes } from 'svelte/elements';
 	import Dialog from '../Dialog/Dialog.svelte';
 	import VisuallyHidden from '../VisuallyHidden/VisuallyHidden.svelte';
@@ -109,7 +110,8 @@
 	const selectableItems: CommandPaletteSelectable[] = $derived(ordered.map((item) => ({ value: item.id, label: item.label })));
 	const getItemId = (index: number) => `${listId}-item-${index}`;
 
-	function handleClose() {
+	/** Clear the query, results and pending searches, as on close. */
+	function resetState() {
 		version++;
 		typedSearch = '';
 		search = '';
@@ -119,6 +121,9 @@
 		if (controlledValue === undefined) internalValue = '';
 		searchSource.cancel?.();
 		announcement = '';
+	}
+	function handleClose() {
+		resetState();
 		onOpenChange(false);
 	}
 
@@ -160,6 +165,8 @@
 	$effect(() => {
 		const source = searchSource;
 		if (!isOpen) {
+			// Port change: an owner-driven close resets the palette too.
+			if (openSource !== null) untrack(resetState);
 			openSource = null;
 			return;
 		}

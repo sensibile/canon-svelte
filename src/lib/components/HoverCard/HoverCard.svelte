@@ -5,6 +5,8 @@
   pointer or focus is inside it and hides `hideDelay` after both leave, or on Escape. Without a
   `label` the trigger is described by the card (role group); with one the card is a labelled
   dialog and the trigger gets aria-haspopup, aria-controls and aria-expanded where its role allows.
+  Port changes: a controlled card's interactions request changes through onOpenChange, and focus
+  on the trigger or in the card keeps it open like hover does.
   Not yet ported: the useHoverCard hook (use the component), the touch bottom-sheet presentation,
   and the tap recognizer's movement and long-press rules (a touch click counts as a tap).
 -->
@@ -148,16 +150,17 @@
 	// A controlled card follows `isOpen`; the trigger's events only request changes through onOpenChange.
 	const open = $derived(isOpen ?? layerOpen);
 
+	// Port change: a controlled card's hover, focus and tap still request changes through onOpenChange.
 	function show() {
-		if (layerOpen) return;
-		layerOpen = true;
+		if (open) return;
+		if (isOpen === undefined) layerOpen = true;
 		onOpenChange?.(true);
 	}
 	function hide() {
 		isHoveringCard = false;
 		disarmOutside();
-		if (!layerOpen) return;
-		layerOpen = false;
+		if (!open) return;
+		if (isOpen === undefined) layerOpen = false;
 		onOpenChange?.(false);
 	}
 
@@ -213,15 +216,17 @@
 		showTimer = hideTimer = undefined;
 	}
 	function scheduleShow() {
-		if (!isEnabled || isOpen === false) return;
+		if (!isEnabled) return;
 		clearTimers();
 		showTimer = setTimeout(show, delay);
 	}
+	// Port change: focus on the trigger or in the card also keeps the card open.
 	function scheduleHide() {
-		if (isOpen === true) return;
 		clearTimers();
 		hideTimer = setTimeout(() => {
-			if (!isHoveringCard) hide();
+			const active = document.activeElement;
+			const holdsFocus = (focusCounted && wrapper?.contains(active)) || card?.contains(active);
+			if (!isHoveringCard && !holdsFocus) hide();
 		}, hideDelay);
 	}
 
@@ -244,7 +249,7 @@
 	let touchPressed = false;
 	function onpointerdown(e: PointerEvent) {
 		isTouchPointer = e.pointerType === 'touch' || e.pointerType === 'pen';
-		touchPressed = isTouchPointer && isOpen === undefined;
+		touchPressed = isTouchPointer;
 		if (touchPressed) {
 			clearTimeout(showTimer);
 			showTimer = undefined;
@@ -279,7 +284,6 @@
 			isEscapeDismissing = false;
 			return;
 		}
-		if (isOpen === false) return;
 		clearTimers();
 		show();
 	}
@@ -325,6 +329,8 @@
 		const layer = pushLayer();
 		const onKey = (e: KeyboardEvent) => {
 			if (e.key !== 'Escape' || e.defaultPrevented || !layer.isTop()) return;
+			// Consume it, so an enclosing modal doesn't also close.
+			e.preventDefault();
 			clearTimers();
 			disarmOutside();
 			if (isOpen !== undefined) {
@@ -373,6 +379,9 @@
 		isHoveringCard = false;
 		scheduleHide();
 	}
+	function onCardFocusIn() {
+		clearTimers();
+	}
 	function onCardFocusOut(e: FocusEvent) {
 		const related = e.relatedTarget as Node | null;
 		if (card?.contains(related) || trigger?.contains(related)) return;
@@ -411,6 +420,7 @@
 	bind:element={card}
 	onmouseenter={onCardMouseEnter}
 	onmouseleave={onCardMouseLeave}
+	onfocusin={onCardFocusIn}
 	onfocusout={onCardFocusOut}
 >
 	<div class="content">
