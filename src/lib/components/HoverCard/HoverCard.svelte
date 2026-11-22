@@ -164,6 +164,14 @@
 		onOpenChange?.(false);
 	}
 
+	/** Skip `display: contents` wrappers (such as a Button's Tooltip span) to the element with a box. */
+	function boxedElement(el: HTMLElement): HTMLElement {
+		let current = el;
+		while (getComputedStyle(current).display === 'contents' && current.firstElementChild instanceof HTMLElement) {
+			current = current.firstElementChild;
+		}
+		return current;
+	}
 	// The trigger is the first element inside; plain text gets a focusable inline wrapper instead.
 	let trigger = $state<HTMLElement | null>(null);
 	let textOnly = $state(false);
@@ -173,7 +181,7 @@
 		return observeChildren(root, () => {
 			const first = root.firstElementChild as HTMLElement | null;
 			textOnly = first == null && (root.textContent ?? '').trim() !== '';
-			trigger = first ?? root;
+			trigger = first ? boxedElement(first) : root;
 		});
 	});
 	const showIndication = $derived(hasHoverIndication === true || (hasHoverIndication === 'auto' && textOnly));
@@ -206,6 +214,7 @@
 	let showTimer: ReturnType<typeof setTimeout> | undefined;
 	let hideTimer: ReturnType<typeof setTimeout> | undefined;
 	let isHoveringCard = false;
+	let isHoveringTrigger = false;
 	let isTouchPointer = false;
 	let isEscapeDismissing = false;
 	let focusCounted = false;
@@ -226,7 +235,7 @@
 		hideTimer = setTimeout(() => {
 			const active = document.activeElement;
 			const holdsFocus = (focusCounted && wrapper?.contains(active)) || card?.contains(active);
-			if (!isHoveringCard && !holdsFocus) hide();
+			if (!isHoveringCard && !isHoveringTrigger && !holdsFocus) hide();
 		}, hideDelay);
 	}
 
@@ -241,9 +250,12 @@
 		isTouchPointer = e.pointerType === 'touch';
 	}
 	function onmouseenter() {
-		if (!isTouchPointer) scheduleShow();
+		if (isTouchPointer) return;
+		isHoveringTrigger = true;
+		scheduleShow();
 	}
 	function onmouseleave() {
+		isHoveringTrigger = false;
 		if (!isTouchPointer) scheduleHide();
 	}
 	let touchPressed = false;
