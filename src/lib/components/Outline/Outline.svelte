@@ -9,6 +9,7 @@
   custom link components, and the reduced-motion fade on coarse pointers (reduced motion jumps).
   Port change: `scrollContainerRef` is `scrollContainer` (the element itself).
   Port change: the indicator's anchor name is unique per Outline, so several can share a page.
+  Port change: navigation scrolls only the scroll container, also at offset 0.
 -->
 <script lang="ts">
 	import type { HTMLAttributes } from 'svelte/elements';
@@ -144,10 +145,8 @@
 
 	function scrollToTarget(target: HTMLElement, scrollRoot: HTMLElement | null, scrollTarget: HTMLElement | Window) {
 		const behavior: ScrollBehavior = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth';
-		if (offset === 0) {
-			target.scrollIntoView({ behavior, block: 'start' });
-			return;
-		}
+		// Port change: Astryx uses scrollIntoView at offset 0, which can also scroll outer ancestors;
+		// scrolling only the scroll container keeps the rest of the page still.
 		const delta = target.getBoundingClientRect().top - restingTop(target, scrollRoot);
 		scrollTarget.scrollBy({ top: delta, behavior });
 	}

@@ -8,7 +8,6 @@
 	import type { Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { setBreadcrumbContext, type BreadcrumbsVariant } from './context.js';
-	import { observeChildren } from '../../internal/observeChildren.js';
 
 	interface Props extends HTMLAttributes<HTMLElement> {
 		children: Snippet;
@@ -60,9 +59,18 @@
 				marked = target;
 			}
 		};
-		const stop = observeChildren(ol, update);
+		// Items swap content or change `isCurrent` (an aria-current or data-auto-current change);
+		// the marker's own writes settle on the next pass because `update` is idempotent.
+		update();
+		const observer = new MutationObserver(update);
+		observer.observe(ol, {
+			childList: true,
+			subtree: true,
+			attributes: true,
+			attributeFilter: ['aria-current', 'data-auto-current']
+		});
 		return () => {
-			stop();
+			observer.disconnect();
 			unmark();
 		};
 	});
