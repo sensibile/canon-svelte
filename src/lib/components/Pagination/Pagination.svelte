@@ -222,6 +222,16 @@
 		e.preventDefault();
 		items[(next + items.length) % items.length].focus();
 	}
+	/** Click, Enter or Space: select the dot's page; when it already has focus, no focusin will do it. */
+	function activateDot(dot: HTMLButtonElement) {
+		if (document.activeElement !== dot) {
+			dot.focus();
+			return;
+		}
+		if (isDisabled) return;
+		const nextPage = Number(dot.dataset.page);
+		if (Number.isFinite(nextPage) && nextPage !== currentPage) handlePageChange(nextPage);
+	}
 	function onDotsFocusIn(e: FocusEvent) {
 		if (isDisabled) return;
 		const focused = (e.target as HTMLElement | null)?.closest<HTMLElement>('button[data-page]');
@@ -339,7 +349,7 @@
 							aria-disabled={isDisabled || undefined}
 							tabindex={isActive ? 0 : -1}
 							onmousedown={(e) => e.preventDefault()}
-							onclick={(e) => e.currentTarget.focus()}
+							onclick={(e) => activateDot(e.currentTarget)}
 						></button>
 					{/each}
 				</div>
