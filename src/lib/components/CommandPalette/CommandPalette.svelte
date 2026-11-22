@@ -172,7 +172,8 @@
 		}
 		const isNewSourceWhileOpen = openSource !== null && openSource !== source;
 		openSource = source;
-		void runSearch(isNewSourceWhileOpen ? typedSearch : '');
+		// Run untracked, so the query and results it reads don't re-run this effect.
+		untrack(() => void runSearch(isNewSourceWhileOpen ? typedSearch : ''));
 		return () => source.cancel?.();
 	});
 

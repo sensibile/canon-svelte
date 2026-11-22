@@ -148,11 +148,11 @@
 		if (untrack(() => isDefaultOpen)) layerOpen = true;
 	});
 	// A controlled card follows `isOpen`; the trigger's events only request changes through onOpenChange.
-	const open = $derived(isOpen ?? layerOpen);
+	const open = $derived(isEnabled && (isOpen ?? layerOpen));
 
 	// Port change: a controlled card's hover, focus and tap still request changes through onOpenChange.
 	function show() {
-		if (open) return;
+		if (open || !isEnabled) return;
 		if (isOpen === undefined) layerOpen = true;
 		onOpenChange?.(true);
 	}
@@ -367,6 +367,15 @@
 	$effect(() => () => {
 		clearTimers();
 		disarmOutside();
+	});
+	// Disabling closes the card and cancels a pending open.
+	$effect(() => {
+		if (isEnabled) return;
+		untrack(() => {
+			clearTimers();
+			disarmOutside();
+			layerOpen = false;
+		});
 	});
 
 	function onCardMouseEnter() {
