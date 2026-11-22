@@ -18,6 +18,17 @@ export {
 export { default as Dialog, type DialogPurpose, type DialogVariant } from './components/Dialog/Dialog.svelte';
 export { default as DialogHeader } from './components/Dialog/DialogHeader.svelte';
 export { default as AlertDialog } from './components/AlertDialog/AlertDialog.svelte';
+export { default as CommandPalette } from './components/CommandPalette/CommandPalette.svelte';
+export { default as CommandPaletteInput } from './components/CommandPalette/CommandPaletteInput.svelte';
+export { default as CommandPaletteList } from './components/CommandPalette/CommandPaletteList.svelte';
+export { default as CommandPaletteItem } from './components/CommandPalette/CommandPaletteItem.svelte';
+export { default as CommandPaletteGroup } from './components/CommandPalette/CommandPaletteGroup.svelte';
+export { default as CommandPaletteFooter } from './components/CommandPalette/CommandPaletteFooter.svelte';
+export { default as CommandPaletteEmpty } from './components/CommandPalette/CommandPaletteEmpty.svelte';
+export {
+	getCommandPaletteContext,
+	type CommandPaletteContextValue
+} from './components/CommandPalette/context.js';
 export { default as Drawer } from './components/Drawer/Drawer.svelte';
 export { default as DrawerHeader } from './components/Drawer/DrawerHeader.svelte';
 export {
