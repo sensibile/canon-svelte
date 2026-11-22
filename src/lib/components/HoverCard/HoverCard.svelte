@@ -346,23 +346,27 @@
 		};
 	});
 
-	// A controlled close returns focus from the card to the trigger, like an Escape.
-	let wasOpen = untrack(() => open);
 	$effect(() => {
 		const now = isOpen;
 		if (now === undefined) return;
 		untrack(() => {
 			clearTimers();
 			layerOpen = now;
+			if (!now) disarmOutside();
+		});
+	});
+	// A close from outside (the owner, or disabling) returns focus from the card to the trigger,
+	// like an Escape. Runs before the DOM update, while the card and its focused element still exist.
+	let wasOpen = untrack(() => open);
+	$effect.pre(() => {
+		const now = open;
+		untrack(() => {
 			if (!now && wasOpen && card?.contains(document.activeElement)) {
 				isEscapeDismissing = true;
 				trigger?.focus();
 			}
-			if (!now) disarmOutside();
+			wasOpen = now;
 		});
-	});
-	$effect(() => {
-		wasOpen = open;
 	});
 	$effect(() => () => {
 		clearTimers();

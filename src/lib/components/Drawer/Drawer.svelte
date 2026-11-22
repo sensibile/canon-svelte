@@ -89,6 +89,13 @@
 	}
 
 	let opener: HTMLElement | null = null;
+	// Whether the host was shown as a modal dialog (true) or a manual popover (false).
+	let hostModal: boolean | null = null;
+	function showHost(el: HTMLDialogElement, modal: boolean) {
+		if (modal) el.showModal();
+		else el.showPopover();
+		hostModal = modal;
+	}
 	// Show the host when opened; after closing, wait for the exit slide before hiding it.
 	$effect(() => {
 		const el = dialog;
@@ -97,9 +104,15 @@
 		if (isOpen) {
 			if (!isHostOpen(el)) {
 				opener = el.ownerDocument.activeElement as HTMLElement | null;
-				if (modal) el.showModal();
-				else el.showPopover();
+				showHost(el, modal);
 				el.querySelector<HTMLElement>('[data-autofocus]')?.focus();
+			} else if (hostModal !== modal) {
+				// The scrim changed while open: re-show the host in the new mode, so the page's
+				// inertness matches the scrim.
+				const focused = el.ownerDocument.activeElement as HTMLElement | null;
+				hideHost(el);
+				showHost(el, modal);
+				if (focused && el.contains(focused)) focused.focus({ preventScroll: true });
 			}
 			return;
 		}
@@ -197,7 +210,8 @@
 		}
 		// A <form method="dialog"> closes the element natively; tell the owner.
 		const onClose = () => {
-			if (isOpen) onOpenChange(false);
+			// A modality switch re-shows the host, so its queued close event is not a dismissal.
+			if (isOpen && !isHostOpen(el)) onOpenChange(false);
 		};
 		el.addEventListener('close', onClose);
 		cleanups.push(() => el.removeEventListener('close', onClose));
