@@ -88,6 +88,11 @@ export {
 	type ToastType
 } from './components/Toast/toastStore.svelte.js';
 export { default as Tooltip, type TooltipFocusTrigger } from './components/Tooltip/Tooltip.svelte';
+export {
+	default as HoverCard,
+	type HoverCardFocusTrigger,
+	type HoverCardTouchTrigger
+} from './components/HoverCard/HoverCard.svelte';
 export { default as VisuallyHidden } from './components/VisuallyHidden/VisuallyHidden.svelte';
 
 // Layout and content (step 4b)

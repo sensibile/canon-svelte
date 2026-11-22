@@ -1,15 +1,16 @@
 <!--
   Port of Astryx `Timestamp` (packages/core/src/Timestamp), MIT, Meta Platforms, Inc.
   Renders a <time> in a relative, absolute or "auto" format; relative times can tick live.
-  The details card (full date per zone) shows in a Tooltip on hover and focus.
-  Not yet ported: the interactive hover card with copy buttons (comes with HoverCard),
-  non-Gregorian calendars and the locale context (pass `locale` instead).
+  The details card (full date per zone, with copy buttons on copyable rows) is a HoverCard shown on
+  hover and focus; while it is open the time is its popup trigger.
+  Not yet ported: non-Gregorian calendars and the locale context (pass `locale` instead).
 -->
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import type { HTMLTimeAttributes } from 'svelte/elements';
 	import Text from '../Text/Text.svelte';
-	import Tooltip from '../Tooltip/Tooltip.svelte';
+	import HoverCard from '../HoverCard/HoverCard.svelte';
+	import TimestampCopyButton from './TimestampCopyButton.svelte';
 	import VisuallyHidden from '../VisuallyHidden/VisuallyHidden.svelte';
 	import type { TextColor, TextSize, TextType, TextWeight } from '../../types.js';
 	import {
@@ -128,6 +129,7 @@
 				: formatTooltipLines(date, entries, locale, timezoneID)
 	);
 	const hasLabelColumn = $derived(lines.some((l) => l.label != null && l.label !== ''));
+	const hasActionColumn = $derived(lines.some((l) => l.isCopyable));
 
 	// Hold live refreshes while focus is on the time (or a control it names), so a screen reader
 	// isn't re-reading a changing label; catch up as soon as focus leaves.
@@ -188,7 +190,7 @@
 {/snippet}
 
 {#snippet details()}
-	<dl class="details" class:labelled={hasLabelColumn}>
+	<dl class="details" class:labelled={hasLabelColumn} class:actions={hasActionColumn}>
 		{#each lines as line, i (i)}
 			<div class="row">
 				{#if hasLabelColumn}
@@ -198,7 +200,14 @@
 				{:else}
 					<dt class="sr-dt"><VisuallyHidden>{line.zoneName}</VisuallyHidden></dt>
 				{/if}
-				<dd class="value">{line.value}</dd>
+				{#if hasActionColumn}
+					<dd class="value value-cells">
+						<span>{line.value}</span>
+						<span class="action">{#if line.isCopyable}<TimestampCopyButton value={line.value} />{/if}</span>
+					</dd>
+				{:else}
+					<dd class="value">{line.value}</dd>
+				{/if}
 			</div>
 		{/each}
 	</dl>
@@ -215,7 +224,9 @@
 		data-format={effectiveFormat}
 	>
 		{#if showTooltip}
-			<Tooltip content={details} focusTrigger="always" hasHoverIndication={false}>{@render time()}</Tooltip>
+			<HoverCard content={details} focusTrigger="always" label="Timestamp details" hasHoverIndication={false}>
+				{@render time()}
+			</HoverCard>
 		{:else}
 			{@render time()}
 		{/if}
@@ -239,20 +250,38 @@
 			grid-template-columns: 1fr;
 			align-items: center;
 			column-gap: var(--spacing-4);
-			row-gap: var(--spacing-1);
+			row-gap: var(--spacing-2);
 			margin: 0;
 			padding: 0;
 		}
 		.details.labelled { grid-template-columns: auto 1fr; }
+		.details.actions { grid-template-columns: 1fr auto; }
+		.details.labelled.actions { grid-template-columns: auto 1fr auto; }
 		.row { display: contents; }
 		.label {
 			margin: 0;
-			opacity: 0.75;
+			color: var(--color-text-secondary);
 			font-size: var(--text-supporting-size);
 			line-height: var(--text-supporting-leading);
 			white-space: nowrap;
 		}
 		.sr-dt { display: contents; }
-		.value { margin: 0; white-space: nowrap; }
+		.value {
+			margin: 0;
+			color: var(--color-text-primary);
+			font-size: var(--text-body-size);
+			line-height: var(--text-body-leading);
+			white-space: nowrap;
+		}
+		.value-cells {
+			grid-column: span 2;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+		}
+		@supports (grid-template-columns: subgrid) {
+			.value-cells { display: grid; grid-template-columns: subgrid; }
+		}
+		.action { display: flex; justify-content: flex-end; align-items: center; }
 	}
 </style>
