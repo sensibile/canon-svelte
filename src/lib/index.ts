@@ -17,6 +17,27 @@ export {
 } from './components/CheckboxInput/CheckboxInput.svelte';
 export { default as Dialog, type DialogPurpose, type DialogVariant } from './components/Dialog/Dialog.svelte';
 export { default as DialogHeader } from './components/Dialog/DialogHeader.svelte';
+export { default as AlertDialog } from './components/AlertDialog/AlertDialog.svelte';
+export { default as CommandPalette } from './components/CommandPalette/CommandPalette.svelte';
+export { default as CommandPaletteInput } from './components/CommandPalette/CommandPaletteInput.svelte';
+export { default as CommandPaletteList } from './components/CommandPalette/CommandPaletteList.svelte';
+export { default as CommandPaletteItem } from './components/CommandPalette/CommandPaletteItem.svelte';
+export { default as CommandPaletteGroup } from './components/CommandPalette/CommandPaletteGroup.svelte';
+export { default as CommandPaletteFooter } from './components/CommandPalette/CommandPaletteFooter.svelte';
+export { default as CommandPaletteEmpty } from './components/CommandPalette/CommandPaletteEmpty.svelte';
+export {
+	getCommandPaletteContext,
+	type CommandPaletteContextValue
+} from './components/CommandPalette/context.js';
+export { default as Drawer } from './components/Drawer/Drawer.svelte';
+export { default as DrawerHeader } from './components/Drawer/DrawerHeader.svelte';
+export {
+	default as Overlay,
+	type OverlayScrimMode,
+	type OverlayPosition,
+	type OverlayAlign,
+	type OverlayShowOn
+} from './components/Overlay/Overlay.svelte';
 export { default as Divider } from './components/Divider/Divider.svelte';
 export { default as DropdownMenu } from './components/DropdownMenu/DropdownMenu.svelte';
 export { default as DropdownMenuItem } from './components/DropdownMenu/DropdownMenuItem.svelte';
@@ -88,6 +109,11 @@ export {
 	type ToastType
 } from './components/Toast/toastStore.svelte.js';
 export { default as Tooltip, type TooltipFocusTrigger } from './components/Tooltip/Tooltip.svelte';
+export {
+	default as HoverCard,
+	type HoverCardFocusTrigger,
+	type HoverCardTouchTrigger
+} from './components/HoverCard/HoverCard.svelte';
 export { default as VisuallyHidden } from './components/VisuallyHidden/VisuallyHidden.svelte';
 
 // Layout and content (step 4b)
