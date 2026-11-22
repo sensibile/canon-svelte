@@ -45,6 +45,8 @@
 			marked = null;
 		};
 		const update = () => {
+			// An item that becomes explicitly current keeps its aria-current; stop owning it.
+			if (marked?.closest('li')?.dataset.explicitCurrent === 'true') marked = null;
 			const items = Array.from(ol.children) as HTMLElement[];
 			const last = items.at(-1);
 			const target =
@@ -67,7 +69,7 @@
 			childList: true,
 			subtree: true,
 			attributes: true,
-			attributeFilter: ['aria-current', 'data-auto-current']
+			attributeFilter: ['aria-current', 'data-auto-current', 'data-explicit-current']
 		});
 		return () => {
 			observer.disconnect();

@@ -60,6 +60,7 @@
 	class={['astryx-breadcrumb-item', className].filter(Boolean).join(' ')}
 	data-variant={variant}
 	data-auto-current={isCurrent == null ? 'true' : undefined}
+	data-explicit-current={isCurrent ? 'true' : undefined}
 	{...rest}
 >
 	<span class="separator" aria-hidden="true">
