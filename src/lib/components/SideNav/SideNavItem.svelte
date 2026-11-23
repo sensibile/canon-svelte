@@ -6,7 +6,7 @@
   In a collapsed SideNav only rows with an `icon` stay: leaves show a tooltip with the label,
   and rows with children open a flyout listing them on hover or click.
   Port change: `icon` / `selectedIcon` take a built-in icon name or an icon component;
-  `endContent` and `actions` are snippets.
+  `endContent` and `actions` are snippets. A disabled row's chevron does not toggle its children.
   Not yet ported: press feedback animation, LinkProvider (`as`), closing an AppShell mobile drawer.
 -->
 <script lang="ts">
@@ -125,6 +125,8 @@
 	function handleToggleClick(e: MouseEvent) {
 		e.preventDefault();
 		e.stopPropagation();
+		// Port change: Astryx leaves the chevron live on disabled rows, so keyboard users could expand them.
+		if (isDisabled) return;
 		toggleItemCollapse();
 	}
 
@@ -266,6 +268,8 @@
 						aria-label={isItemCollapsed ? `Expand ${label}` : `Collapse ${label}`}
 						aria-expanded={!isItemCollapsed}
 						aria-controls={childrenId}
+						aria-disabled={isDisabled || undefined}
+						data-disabled={isDisabled || undefined}
 						onclick={handleToggleClick}
 					>
 						{@render chevron(false)}
@@ -381,6 +385,7 @@
 			.expand-toggle:hover { background-color: var(--color-overlay-hover); }
 		}
 		.expand-toggle:active { background-color: var(--color-overlay-pressed); }
+		.expand-toggle[data-disabled] { cursor: not-allowed; background-color: transparent; }
 		.expand-toggle:focus-visible {
 			outline: var(--focus-outline-width) var(--focus-outline-style) var(--focus-outline-color);
 			outline-offset: var(--focus-outline-offset);
