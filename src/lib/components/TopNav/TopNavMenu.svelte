@@ -156,7 +156,7 @@
 		onkeydown={onMenuKeydown}
 		onfocusin={onMenuFocusin}
 	>
-		{#each items as item, index (item.title)}
+		{#each items as item, index}
 			{@const href = item.href != null && isSafeUrl(item.href) ? item.href : undefined}
 			{#if item.href != null}
 				<a

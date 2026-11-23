@@ -52,11 +52,6 @@
 		if (!open || !el) return;
 		const doc = el.ownerDocument;
 		const layer = pushLayer();
-		const focusSel = untrack(() => autoFocus);
-		let frame = 0;
-		if (focusSel) {
-			frame = requestAnimationFrame(() => el.querySelector<HTMLElement>(focusSel)?.focus());
-		}
 		const onPointerDown = (e: PointerEvent) => {
 			if (!layer.isTop()) return;
 			const t = e.target as Node;
@@ -78,12 +73,20 @@
 		doc.addEventListener('keydown', onKey);
 		el.addEventListener('focusout', onFocusOut);
 		return () => {
-			cancelAnimationFrame(frame);
 			layer.remove();
 			doc.removeEventListener('pointerdown', onPointerDown, true);
 			doc.removeEventListener('keydown', onKey);
 			el.removeEventListener('focusout', onFocusOut);
 		};
+	});
+
+	// Move focus in when opened by click or key, or when a click confirms a hover-opened flyout.
+	$effect(() => {
+		const el = surface;
+		const selector = autoFocus;
+		if (!open || !el || !selector) return;
+		const frame = requestAnimationFrame(() => el.querySelector<HTMLElement>(selector)?.focus());
+		return () => cancelAnimationFrame(frame);
 	});
 
 	// Closing with focus inside would drop it on <body>; send it back to the anchor instead.

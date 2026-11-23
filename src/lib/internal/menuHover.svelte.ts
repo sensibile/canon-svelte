@@ -93,9 +93,13 @@ export function createMenuHover(options: MenuHoverOptions): MenuHover {
 			if (!isEnabled()) return;
 			clear();
 			if (open && hoverMode) {
-				// The click confirms a hover-open; past the guard it closes, as a toggle.
+				// The click confirms a hover-open, and the flyout takes focus as if click-opened;
+				// past the guard it closes, as a toggle.
 				hoverMode = false;
-				if (performance.now() - hoverOpenedAt < clickGuardMs) return;
+				if (performance.now() - hoverOpenedAt < clickGuardMs) {
+					openedByClick = true;
+					return;
+				}
 				set(false, false);
 				return;
 			}

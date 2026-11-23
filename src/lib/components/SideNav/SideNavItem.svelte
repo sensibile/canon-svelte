@@ -90,7 +90,10 @@
 	const config = $derived(typeof itemCollapsible === 'object' ? itemCollapsible : {});
 	const isItemCollapsible = $derived(hasChildren && itemCollapsible !== false);
 	let uncontrolledCollapsed = $state<boolean | undefined>(undefined);
-	const isItemCollapsed = $derived(config.isCollapsed ?? uncontrolledCollapsed ?? config.defaultIsCollapsed ?? false);
+	// Children always show when the row isn't collapsible, whatever state was left behind.
+	const isItemCollapsed = $derived(
+		isItemCollapsible && (config.isCollapsed ?? uncontrolledCollapsed ?? config.defaultIsCollapsed ?? false)
+	);
 	function toggleItemCollapse() {
 		const next = !isItemCollapsed;
 		if (config.isCollapsed === undefined) uncontrolledCollapsed = next;
@@ -126,10 +129,10 @@
 	}
 
 	// Rail rows with children open a flyout of them.
-	const flyout = createMenuHover({ isEnabled: () => isCollapsed && hasChildren, clickGuardMs: 0 });
+	const flyout = createMenuHover({ isEnabled: () => isCollapsed && hasChildren && !isDisabled, clickGuardMs: 0 });
 	let railTrigger: HTMLButtonElement | undefined = $state();
 	$effect(() => {
-		if (!isCollapsed && flyout.isOpen) flyout.hide();
+		if ((!isCollapsed || isDisabled) && flyout.isOpen) flyout.hide();
 	});
 	$effect(() => () => flyout.destroy());
 	// Choosing a row closes the flyout; expanding or collapsing a nested row keeps it open.
@@ -167,6 +170,7 @@
 					aria-label={railLabel}
 					aria-describedby={ariaDescribedby}
 					aria-haspopup="dialog"
+					aria-disabled={isDisabled || undefined}
 					aria-expanded={flyout.isOpen}
 					aria-controls={flyout.isOpen ? childrenId : undefined}
 					data-testid={testId}
