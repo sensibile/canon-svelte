@@ -4,6 +4,9 @@ export type { LayerAlignment, LayerPlacement } from './internal/position.js';
 export * from './types.js';
 
 export { default as Badge, type BadgeVariant } from './components/Badge/Badge.svelte';
+export { default as Breadcrumbs } from './components/Breadcrumbs/Breadcrumbs.svelte';
+export { default as BreadcrumbItem } from './components/Breadcrumbs/BreadcrumbItem.svelte';
+export type { BreadcrumbsVariant } from './components/Breadcrumbs/context.js';
 export {
 	default as Button,
 	type ButtonSize,
@@ -302,3 +305,26 @@ export type {
 	PowerSearchComponentOverride,
 	PowerSearchComponents
 } from './components/PowerSearch/types.js';
+export {
+	default as Pagination,
+	generatePageRange,
+	type PaginationSize,
+	type PaginationVariant
+} from './components/Pagination/Pagination.svelte';
+export {
+	default as Stepper,
+	type StepperCollapsedVariant,
+	type StepperHorizontalOptions
+} from './components/Stepper/Stepper.svelte';
+export { default as Step, type StepDensity, type StepIndicatorPreset } from './components/Stepper/Step.svelte';
+export {
+	getStepperContext,
+	type StepperContextValue,
+	type StepperDensity,
+	type StepperIndicatorPosition,
+	type StepperOrientation,
+	type StepStatus
+} from './components/Stepper/context.js';
+export { default as Outline } from './components/Outline/Outline.svelte';
+export { outlineFromDOM } from './components/Outline/outlineFromDOM.svelte.js';
+export type { OutlineItem } from './components/Outline/types.js';
