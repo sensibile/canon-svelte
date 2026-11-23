@@ -132,6 +132,12 @@
 		if (!isCollapsed && flyout.isOpen) flyout.hide();
 	});
 	$effect(() => () => flyout.destroy());
+	// Choosing a row closes the flyout; expanding or collapsing a nested row keeps it open.
+	// Port change: Astryx closes on any click inside, which also drops a nested expansion.
+	function onFlyoutClick(e: MouseEvent) {
+		if ((e.target as Element).closest('[aria-expanded]')) return;
+		flyout.hide();
+	}
 </script>
 
 {#snippet chevron(inRow: boolean)}
@@ -186,7 +192,7 @@
 					onpointerleave={flyout.onContentLeave}
 				>
 					<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions (choosing a row closes the flyout; the rows handle keys) -->
-					<div class="flyout-surface" onclick={() => flyout.hide()}>
+					<div class="flyout-surface" onclick={onFlyoutClick}>
 						<div class="flyout-header">{label}</div>
 						{@render children?.()}
 					</div>

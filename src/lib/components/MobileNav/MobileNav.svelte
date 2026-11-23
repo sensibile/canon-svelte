@@ -50,6 +50,7 @@
 	const CLOSE_WITHIN_HOLD = 0.6;
 
 	let dialog: HTMLDialogElement | undefined = $state();
+	let drawer: HTMLDivElement | undefined = $state();
 	let isRendered = $state(false);
 	let autoSide = $state<'start' | 'end'>('end');
 	const resolvedSide = $derived(side === 'auto' ? autoSide : side);
@@ -90,7 +91,8 @@
 			.filter((n): n is number => n !== null);
 		return ms.length ? Math.min(...ms) : null;
 	}
-	function closeDelay(el: HTMLDialogElement): number {
+	// The exit slide runs on the drawer panel, so its transition sets how long to hold the dialog.
+	function closeDelay(el: HTMLElement): number {
 		const cap = matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : MAX_CLOSE_DELAY_MS;
 		const hold = parseShortestMs(getComputedStyle(el).transitionDuration);
 		if (hold === null) return cap;
@@ -120,7 +122,7 @@
 			if (untrack(() => isRendered)) isRendered = false;
 			return;
 		}
-		const timer = setTimeout(() => closeAndRestore(el), closeDelay(el));
+		const timer = setTimeout(() => closeAndRestore(el), closeDelay(drawer ?? el));
 		return () => clearTimeout(timer);
 	});
 	// Unmounting while open closes the dialog and returns focus.
@@ -155,9 +157,16 @@
 		e.preventDefault();
 		onOpenChange(false);
 	}
-	// The dialog fills the viewport; a click on it (not the drawer) is a backdrop press.
+	// The dialog fills the viewport; a press that starts and ends on it (not the drawer) is a
+	// backdrop press. A drag out of the drawer ends on the dialog too, but didn't start there.
+	let downOnBackdrop = false;
+	function onpointerdown(e: PointerEvent) {
+		downOnBackdrop = e.target === e.currentTarget;
+	}
 	function onclick(e: MouseEvent) {
-		if (e.target === e.currentTarget) onOpenChange(false);
+		const started = downOnBackdrop;
+		downOnBackdrop = false;
+		if (started && e.target === e.currentTarget) onOpenChange(false);
 	}
 </script>
 
@@ -173,9 +182,11 @@
 	data-side={resolvedSide}
 	{style}
 	{oncancel}
+	{onpointerdown}
 	{onclick}
 >
 	<div
+		bind:this={drawer}
 		class="astryx-mobile-nav-drawer drawer"
 		data-side={resolvedSide}
 		tabindex="-1"

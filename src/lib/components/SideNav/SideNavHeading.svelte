@@ -7,6 +7,7 @@
   menu becomes an icon button that opens the menu.
   Port change: `icon`, `headerEndContent` and `menu` are snippets. Choosing a menu item closes the
   menu in every layout (Astryx relies on press-and-release dismissal there, not yet ported).
+  In the rail, a heading with both a menu and `headingHref` stays a menu trigger (Port change).
   Not yet ported: press-drag-release menu activation, press feedback, LinkProvider (`as`).
 -->
 <script lang="ts">
@@ -206,17 +207,9 @@
 {#if isCollapsed}
 	{#if icon}
 		<Tooltip content={heading} placement="end" focusTrigger="always">
-			{#if headingHref}
-				<a
-					href={headingHref}
-					aria-label={heading}
-					class={['astryx-nav-item', 'astryx-side-nav-heading', 'collapsed', className]}
-					data-testid={testId}
-					{style}
-				>
-					{@render iconSlot()}
-				</a>
-			{:else if menu}
+			<!-- Port change: with both a menu and headingHref the rail keeps the menu trigger (Astryx
+			     renders the link, which leaves the menu unreachable while collapsed). -->
+			{#if menu}
 				<button
 					bind:this={collapsedButton}
 					type="button"
@@ -233,6 +226,16 @@
 				>
 					{@render iconSlot()}
 				</button>
+			{:else if headingHref}
+				<a
+					href={headingHref}
+					aria-label={heading}
+					class={['astryx-nav-item', 'astryx-side-nav-heading', 'collapsed', className]}
+					data-testid={testId}
+					{style}
+				>
+					{@render iconSlot()}
+				</a>
 			{:else}
 				<div
 					class={['astryx-side-nav-heading', 'root', 'centered', className]}
