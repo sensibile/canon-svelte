@@ -72,7 +72,11 @@
 		doc.addEventListener('pointerdown', onPointerDown, true);
 		doc.addEventListener('keydown', onKey);
 		el.addEventListener('focusout', onFocusOut);
+		// Focus can come back to the trigger and then leave the nav from there.
+		const triggerEl = trigger ?? anchor;
+		triggerEl?.addEventListener('focusout', onFocusOut);
 		return () => {
+			triggerEl?.removeEventListener('focusout', onFocusOut);
 			layer.remove();
 			doc.removeEventListener('pointerdown', onPointerDown, true);
 			doc.removeEventListener('keydown', onKey);

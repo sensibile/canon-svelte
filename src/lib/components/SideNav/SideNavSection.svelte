@@ -2,6 +2,7 @@
   Port of Astryx `SideNavSection` (packages/core/src/SideNav/SideNavSection.tsx), MIT, Meta Platforms, Inc.
   A labelled group of SideNavItems. The header is visually hidden (but still names the group)
   when `isHeaderHidden` is set or the SideNav is collapsed.
+  Port change: a hidden header drops `endContent`, so its controls leave the tab order.
 -->
 <script lang="ts">
 	import type { Snippet } from 'svelte';
@@ -35,7 +36,10 @@
 
 <div {...rest} class={['astryx-side-nav-section', 'section', className]} role="group" aria-labelledby={titleId}>
 	{#if hideHeader}
-		<VisuallyHidden as="div">{@render headerContent()}</VisuallyHidden>
+		<!-- Port change: Astryx hides `endContent` with the title, which leaves its controls focusable but invisible. -->
+		<VisuallyHidden as="div">
+			<span id={titleId}>{title}</span>{#if subtitle}<span>{subtitle}</span>{/if}
+		</VisuallyHidden>
 	{:else}
 		<div class="header">{@render headerContent()}</div>
 	{/if}

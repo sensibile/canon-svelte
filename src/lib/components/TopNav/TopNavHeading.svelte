@@ -4,7 +4,8 @@
   (each optionally a link), and an optional `menu` (a NavHeadingMenu) that opens on hover or from
   its chevron button and overlaps the heading. Choosing a menu item closes it.
   With only a logo it renders a logo link (named by `logoLabel`) or a plain logo.
-  Port change: `logo`, `headerEndContent` and `menu` are snippets.
+  Port change: `logo`, `headerEndContent` and `menu` are snippets. A whole-heading link with
+  `headerEndContent` puts that content beside the link instead of inside it.
   Not yet ported: press-drag-release menu activation, LinkProvider (`as`), the AppShell drawer mode.
 -->
 <script lang="ts">
@@ -158,6 +159,15 @@
 	{:else}
 		<div class={['astryx-top-nav-heading', 'root', className]} data-testid={testId} {style}>{@render logoSlot()}</div>
 	{/if}
+{:else if isWholeHeadingLink && headingHref && headerEndContent}
+	<!-- Port change: Astryx renders the end content inside the heading link; links there would nest. -->
+	<div class={['astryx-top-nav-heading', 'root', className]} data-testid={testId} {style}>
+		<a href={headingHref} class="link-beside-end trigger" data-columns={columns}>
+			{@render logoSlot()}
+			{@render textContent(undefined)}
+		</a>
+		{@render endSlot()}
+	</div>
 {:else if isWholeHeadingLink && headingHref}
 	<a
 		href={headingHref}
@@ -274,12 +284,30 @@
 			outline: 0 none;
 		}
 		.root:has(:global(.astryx-nav-icon)) { padding-inline-start: 0; }
-		.root[data-columns='logo'] { grid-template-columns: auto minmax(0, 1fr); }
-		.root[data-columns='text'] { grid-template-columns: minmax(0, 1fr); }
-		.root[data-columns='logo-links'] { grid-template-columns: auto minmax(min-content, 1fr); }
-		.root[data-columns='links'] { grid-template-columns: minmax(min-content, 1fr); }
-		.root[data-columns='logo-menu'] { grid-template-columns: auto minmax(calc(var(--spacing-7) + var(--spacing-1)), 1fr); }
-		.root[data-columns='menu'] { grid-template-columns: minmax(calc(var(--spacing-7) + var(--spacing-1)), 1fr); }
+		.root[data-columns='logo'],
+		.link-beside-end[data-columns='logo'] { grid-template-columns: auto minmax(0, 1fr); }
+		.root[data-columns='text'],
+		.link-beside-end[data-columns='text'] { grid-template-columns: minmax(0, 1fr); }
+		.root[data-columns='logo-links'],
+		.link-beside-end[data-columns='logo-links'] { grid-template-columns: auto minmax(min-content, 1fr); }
+		.root[data-columns='links'],
+		.link-beside-end[data-columns='links'] { grid-template-columns: minmax(min-content, 1fr); }
+		.root[data-columns='logo-menu'],
+		.link-beside-end[data-columns='logo-menu'] { grid-template-columns: auto minmax(calc(var(--spacing-7) + var(--spacing-1)), 1fr); }
+		.root[data-columns='menu'],
+		.link-beside-end[data-columns='menu'] { grid-template-columns: minmax(calc(var(--spacing-7) + var(--spacing-1)), 1fr); }
+		.link-beside-end {
+			display: grid;
+			grid-auto-flow: column;
+			justify-content: start;
+			align-items: center;
+			align-self: stretch;
+			gap: var(--spacing-2);
+			min-width: 0;
+			text-decoration: none;
+			color: inherit;
+			outline: 0 none;
+		}
 		.trigger {
 			cursor: pointer;
 			border-radius: var(--radius-element);
@@ -291,6 +319,7 @@
 			text-align: start;
 		}
 		a.root:focus-visible,
+		.link-beside-end:focus-visible,
 		.logo:focus-visible,
 		.heading-link:focus-visible,
 		.chevron.interactive:focus-visible,
