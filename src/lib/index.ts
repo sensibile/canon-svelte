@@ -328,3 +328,28 @@ export {
 export { default as Outline } from './components/Outline/Outline.svelte';
 export { outlineFromDOM } from './components/Outline/outlineFromDOM.svelte.js';
 export type { OutlineItem } from './components/Outline/types.js';
+export { default as NavIcon } from './components/NavIcon/NavIcon.svelte';
+export { default as NavHeadingMenu } from './components/NavMenu/NavHeadingMenu.svelte';
+export { default as NavHeadingMenuItem } from './components/NavMenu/NavHeadingMenuItem.svelte';
+export type { NavHeadingMenuSize } from './components/NavMenu/context.js';
+export { default as SideNav } from './components/SideNav/SideNav.svelte';
+export { default as SideNavHeading } from './components/SideNav/SideNavHeading.svelte';
+export { default as SideNavItem } from './components/SideNav/SideNavItem.svelte';
+export { default as SideNavSection } from './components/SideNav/SideNavSection.svelte';
+export { default as SideNavCollapseButton } from './components/SideNav/SideNavCollapseButton.svelte';
+export {
+	getSideNavCollapse,
+	type SideNavCollapseState,
+	type SideNavCollapsibleConfig,
+	type SideNavControlledCollapsible
+} from './components/SideNav/context.js';
+export { default as TopNav } from './components/TopNav/TopNav.svelte';
+export { default as TopNavHeading } from './components/TopNav/TopNavHeading.svelte';
+export { default as TopNavItem } from './components/TopNav/TopNavItem.svelte';
+export { default as TopNavMenu, type TopNavMenuItemData } from './components/TopNav/TopNavMenu.svelte';
+export { default as TopNavMegaMenu } from './components/TopNav/TopNavMegaMenu.svelte';
+export { default as TopNavMegaMenuItem } from './components/TopNav/TopNavMegaMenuItem.svelte';
+export { default as TopNavMegaMenuFeaturedCard } from './components/TopNav/TopNavMegaMenuFeaturedCard.svelte';
+export { getTopNavSlot, type TopNavSlot } from './components/TopNav/context.js';
+export { default as MobileNav } from './components/MobileNav/MobileNav.svelte';
+export { default as MobileNavToggle } from './components/MobileNav/MobileNavToggle.svelte';
