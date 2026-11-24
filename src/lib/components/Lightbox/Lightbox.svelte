@@ -50,6 +50,7 @@
 		releasedZoomTarget,
 		restRange,
 		restingTransform,
+		transformForResize,
 		transformKeepingPoint,
 		zoomMedia,
 		type StagePoint,
@@ -146,10 +147,20 @@
 		};
 	});
 	$effect(() => {
-		if (!isOpen || !dialog) return;
+		const el = dialog;
+		if (!isOpen || !el) return;
 		const layer = pushLayer();
-		const unlock = lockScroll(dialog.ownerDocument);
+		const unlock = lockScroll(el.ownerDocument);
+		// A <form method="dialog"> closes the element natively; tell the owner.
+		const onClose = () => {
+			if (!isOpen || el.open) return;
+			onOpenChange(false);
+			if (trigger?.isConnected) trigger.focus({ preventScroll: true });
+			trigger = null;
+		};
+		el.addEventListener('close', onClose);
 		return () => {
+			el.removeEventListener('close', onClose);
 			layer.remove();
 			unlock();
 		};
@@ -210,6 +221,8 @@
 	let zoom: ZoomTransform = IDENTITY;
 	let isZoomed = $state(false);
 	let isPanning = $state(false);
+	// The geometry the current transform was written against, to carry it through a resize.
+	let zoomGeometry: ZoomGeometry | null = null;
 	function writeZoom(t: ZoomTransform, animate: boolean) {
 		zoom = t;
 		const img = currentImg();
@@ -220,8 +233,24 @@
 			img.style.scale = identity ? '' : String(t.scale);
 		}
 		const g = geometry();
+		zoomGeometry = g;
 		isZoomed = g ? isZoomedFor(g, t) : t.scale > 1.001;
 	}
+	// A resized stage keeps the same part of a zoomed image in view, within the new bounds.
+	$effect(() => {
+		const el = track;
+		if (!el || !isOpen || typeof ResizeObserver === 'undefined') return;
+		const ro = new ResizeObserver(() => {
+			const before = zoomGeometry;
+			const after = geometry();
+			if (!before || !after || gesture !== 'none') return;
+			if (before.width === after.width && before.height === after.height && before.fit.width === after.fit.width) return;
+			if (isZoomedFor(before, zoom)) writeZoom(transformForResize(before, after, zoom), false);
+			else zoomGeometry = after;
+		});
+		ro.observe(el);
+		return () => ro.disconnect();
+	});
 	function zoomTo(target: (g: ZoomGeometry) => ZoomTransform) {
 		const g = geometry();
 		if (g) writeZoom(target(g), true);
@@ -548,7 +577,8 @@
 		zoomTo((g) => doubleClickTarget(g, zoom, point));
 	}
 	function onStageWheel(e: WheelEvent) {
-		if (!isZoomTarget) return;
+		// A long open caption scrolls itself.
+		if (!isZoomTarget || (e.target as Element).closest?.('[data-lightbox-caption]')) return;
 		const g = geometry();
 		if (!g) return;
 		// A wheel's deltas in px: a line is 40px, a page the stage's height.
