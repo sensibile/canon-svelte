@@ -279,6 +279,9 @@
 	function onkeydown(e: KeyboardEvent & { currentTarget: HTMLDialogElement }) {
 		onkeydownProp?.(e);
 		if (e.defaultPrevented) return;
+		// Keys typed into an editable control in a caption stay with that control.
+		const target = e.target as HTMLElement;
+		if (target.closest?.('input, textarea, select, [contenteditable]:not([contenteditable="false"])')) return;
 		if (isZoomTarget) {
 			if (e.key === '+' || e.key === '=') {
 				e.preventDefault();
@@ -303,7 +306,7 @@
 				return;
 			}
 		}
-		if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+		if (isGallery && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
 			e.preventDefault();
 			if ((e.key === 'ArrowRight') !== isRtl()) goToNext();
 			else goToPrev();
@@ -485,7 +488,8 @@
 		const g = gestureGeometry;
 		const cancelled = e.type === 'pointercancel';
 		if (wasPinch) {
-			if (g && centroid) writeZoom(releaseTarget(g, zoom, centroid), true);
+			// Back within the scale limits, and the translation back within its range.
+			if (g && centroid) writeZoom(restingTransform(g, releaseTarget(g, zoom, centroid)), true);
 			// The finger left down does nothing more until it lifts.
 			gesture = 'none';
 			return;
@@ -510,6 +514,13 @@
 		} else if (gesture === 'dismiss' && g) {
 			if (!cancelled && dismissCommits(Math.max(0, dy), v.y)) {
 				close();
+				// A controlled owner can keep it open: then bring the photo and chrome back.
+				tick().then(() => {
+					if (isOpen) {
+						writeZoom(IDENTITY, true);
+						setDismissFade(1, 1);
+					}
+				});
 			} else {
 				writeZoom(IDENTITY, true);
 				setDismissFade(1, 1);
