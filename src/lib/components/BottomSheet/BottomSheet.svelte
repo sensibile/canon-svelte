@@ -29,6 +29,7 @@
 	import {
 		computeDetentOffsets,
 		isValidSnapPoint,
+		nearestOffset,
 		peekOffsetFor,
 		resolveRelease,
 		resolveSnapPoints,
@@ -371,10 +372,13 @@
 		if (!d) return;
 		drag = null;
 		isDragging = false;
-		const first = d.samples[0];
-		const lastSample = d.samples[d.samples.length - 1];
-		const dt = lastSample.t - first.t;
-		const velocity = cancelled || dt <= 0 ? 0 : ((lastSample.y - first.y) / dt) * 1000;
+		// The release counts only the last moments of movement: a drag held still releases at rest.
+		const now = performance.now();
+		const lastY = d.samples[d.samples.length - 1].y;
+		const recent = [...d.samples.filter((sample) => now - sample.t <= VELOCITY_WINDOW_MS), { t: now, y: lastY }];
+		const first = recent[0];
+		const dt = now - first.t;
+		const velocity = cancelled || dt <= 0 ? 0 : ((lastY - first.y) / dt) * 1000;
 		const positions = canSwipeDismiss ? [...d.offsets, d.visible] : d.offsets;
 		const target = resolveRelease(d.offset, velocity, positions);
 		if (canSwipeDismiss && target === d.visible && d.visible > (d.offsets[d.offsets.length - 1] ?? 0)) {
@@ -414,6 +418,35 @@
 		endDrag(e.type === 'pointercancel');
 	}
 
+	function canScrollUp(from: Element | null, root: HTMLElement) {
+		for (let node = from; node; node = node.parentElement) {
+			if (node instanceof HTMLElement && node.scrollTop > 0) {
+				const overflowY = getComputedStyle(node).overflowY;
+				if (node === root || overflowY === 'auto' || overflowY === 'scroll') return true;
+			}
+			if (node === root) break;
+		}
+		return false;
+	}
+
+	// A resized viewport changes the detents: a lowered sheet moves to the nearest one that still exists.
+	$effect(() => {
+		const el = panel;
+		const win = dialog?.ownerDocument.defaultView;
+		if (!el || !win || !isOpen) return;
+		const onResize = () => {
+			measureReserve();
+			// Measure once the new reserve is on the panel.
+			tick().then(() => {
+				if (drag || settledOffset === 0 || !isOpen) return;
+				const g = geometry();
+				settle(nearestOffset(Math.min(settledOffset, g.offsets[g.offsets.length - 1]), g.offsets), g);
+			});
+		};
+		win.addEventListener('resize', onResize);
+		return () => win.removeEventListener('resize', onResize);
+	});
+
 	// On touch, the content drags the sheet when pulled down at its top, or up while the sheet is lowered.
 	$effect(() => {
 		const el = body;
@@ -423,10 +456,12 @@
 		let startY = 0;
 		let mode: 'pending' | 'drag' | 'scroll' = 'pending';
 		const find = (list: TouchList) => Array.from(list).find((t) => t.identifier === touchId);
+		let touchTarget: Element | null = null;
 		const onStart = (e: TouchEvent) => {
 			if (touchId !== null || e.touches.length !== 1) return;
 			const t = e.touches[0];
 			touchId = t.identifier;
+			touchTarget = e.target instanceof Element ? e.target : null;
 			startX = t.clientX;
 			startY = t.clientY;
 			mode = 'pending';
@@ -441,7 +476,8 @@
 					if (Math.abs(dx) >= DRAG_SLOP) mode = 'scroll';
 					return;
 				}
-				const pullsDown = dy > 0 && el.scrollTop <= 0;
+				// A scroller under the finger (the body, or a TextArea in it) that can still scroll up keeps the pull.
+				const pullsDown = dy > 0 && !canScrollUp(touchTarget, el);
 				const raises = dy < 0 && settledOffset > 0;
 				mode = pullsDown || raises ? 'drag' : 'scroll';
 				if (mode === 'drag') startDrag(t.clientY);

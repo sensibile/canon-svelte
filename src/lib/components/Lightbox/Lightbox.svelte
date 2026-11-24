@@ -375,10 +375,14 @@
 			centroid: stagePoint((a.x + b.x) / 2, (a.y + b.y) / 2)
 		};
 	}
+	// Release velocity over the last 100ms, counting a pause before the release as rest.
 	function velocity() {
-		if (samples.length < 2) return { x: 0, y: 0 };
-		const a = samples[0];
-		const b = samples[samples.length - 1];
+		if (samples.length === 0) return { x: 0, y: 0 };
+		const now = performance.now();
+		const last = samples[samples.length - 1];
+		const recent = [...samples.filter((sample) => now - sample.t <= 100), { t: now, x: last.x, y: last.y }];
+		const a = recent[0];
+		const b = recent[recent.length - 1];
 		const dt = b.t - a.t;
 		return dt > 0 ? { x: ((b.x - a.x) / dt) * 1000, y: ((b.y - a.y) / dt) * 1000 } : { x: 0, y: 0 };
 	}
