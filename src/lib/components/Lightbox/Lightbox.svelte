@@ -456,6 +456,11 @@
 			gestureGeometry = geometry();
 		} else if (pointers.size === 2 && isZoomTarget && e.pointerType === 'touch') {
 			if (gesture === 'page') setPageDrag(0, true);
+			if (gesture === 'dismiss') {
+				// A pinch takes over a dismiss drag: the photo returns to its rest and the scrim and chrome come back.
+				writeZoom(startZoom, true);
+				setDismissFade(1, 1);
+			}
 			gesture = 'pinch';
 			didDrag = true;
 			gestureGeometry = geometry();
@@ -667,6 +672,7 @@
 					class:zoomed={isZoomTarget && isZoomed}
 					class:dragging={isPanning}
 					class:touch-dismiss={!isZoomTarget && !isVideo}
+					class:touch-page={!isZoomTarget && isVideo && isGallery}
 					onpointerdown={onStagePointerDown}
 					onpointermove={onStagePointerMove}
 					onpointerup={onStagePointerUp}
@@ -874,6 +880,8 @@
 			min-height: 0;
 		}
 		.image-wrapper.touch-dismiss { touch-action: pinch-zoom; }
+		/* A video page keeps vertical scroll and native controls, but horizontal swipes page the gallery. */
+		.image-wrapper.touch-page { touch-action: pan-y pinch-zoom; }
 		.image-wrapper.zoomable[data-lightbox-over-photo] { cursor: zoom-in; }
 		.image-wrapper.zoomed { cursor: grab; }
 		.image-wrapper.zoomed.dragging { cursor: grabbing; }
