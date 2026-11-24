@@ -308,9 +308,10 @@
 	function onkeydown(e: KeyboardEvent & { currentTarget: HTMLDialogElement }) {
 		onkeydownProp?.(e);
 		if (e.defaultPrevented) return;
-		// Keys typed into an editable control in a caption stay with that control.
+		// Keys typed into an editable control in a caption, or into a video's native controls, stay with that control.
 		const target = e.target as HTMLElement;
-		if (target.closest?.('input, textarea, select, [contenteditable]:not([contenteditable="false"])')) return;
+		if (target.closest?.('input, textarea, select, video[controls], audio[controls], [contenteditable]:not([contenteditable="false"])'))
+			return;
 		if (isZoomTarget) {
 			if (e.key === '+' || e.key === '=') {
 				e.preventDefault();

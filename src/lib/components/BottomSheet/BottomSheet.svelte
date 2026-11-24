@@ -127,6 +127,8 @@
 	const depth = $derived(isOpen && stackView ? stackView.depth : 0);
 	const isStacked = $derived(isOpen && !!stackView?.isStacked);
 	const ownsScrim = $derived(!stackView || stackView.ownsScrim);
+	// The open transition has finished: later style changes skip the entrance.
+	let isEntered = $state(false);
 	// A sheet that takes the scrim over from one closing beneath it shows it at once, so the dim holds.
 	let isScrimTakeover = $state(false);
 	let ownedScrim = false;
@@ -165,8 +167,6 @@
 		if (target?.isConnected) target.focus({ preventScroll: true });
 		opener = null;
 	}
-	// The open transition has finished: later style changes skip the entrance.
-	let isEntered = $state(false);
 	$effect(() => {
 		const el = dialog;
 		const modal = hasScrim;
@@ -379,7 +379,8 @@
 		const first = recent[0];
 		const dt = now - first.t;
 		const velocity = cancelled || dt <= 0 ? 0 : ((lastY - first.y) / dt) * 1000;
-		const positions = canSwipeDismiss ? [...d.offsets, d.visible] : d.offsets;
+		// An interrupted drag never dismisses: it settles on the nearest detent.
+		const positions = canSwipeDismiss && !cancelled ? [...d.offsets, d.visible] : d.offsets;
 		const target = resolveRelease(d.offset, velocity, positions);
 		if (canSwipeDismiss && target === d.visible && d.visible > (d.offsets[d.offsets.length - 1] ?? 0)) {
 			scrimOpacity = 0;
