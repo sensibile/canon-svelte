@@ -37,6 +37,11 @@ export { default as DrawerHeader } from './components/Drawer/DrawerHeader.svelte
 export { default as BottomSheet, type BottomSheetHeight } from './components/BottomSheet/BottomSheet.svelte';
 export type { BottomSheetSnapPoint } from './components/BottomSheet/snapOffsets.js';
 export {
+	default as Lightbox,
+	type LightboxMedia,
+	type LightboxMediaType
+} from './components/Lightbox/Lightbox.svelte';
+export {
 	default as Overlay,
 	type OverlayScrimMode,
 	type OverlayPosition,
