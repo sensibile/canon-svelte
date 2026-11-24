@@ -1,0 +1,73 @@
+/*
+  Port of Astryx `navItemStyles` (packages/core/src/NavItem/navItemStyles.stylex.ts), MIT, Meta Platforms, Inc.
+  Shared row styles for SideNavItem, SideNavHeading and TopNavItem.
+  Port change: a plain stylesheet with global `astryx-nav-item*` classes instead of StyleX
+  objects, since Svelte scoped styles can't be shared between components. The interaction
+  overlay and focus ring that Astryx composes in are included here.
+*/
+@layer astryx-base {
+	.astryx-nav-item {
+		display: flex;
+		align-items: center;
+		gap: var(--spacing-2);
+		width: 100%;
+		min-height: var(--size-element-md);
+		padding-inline: var(--spacing-2);
+		padding-block: 0;
+		border-radius: var(--radius-element);
+		border: 0 none;
+		background-color: transparent;
+		color: var(--color-text-primary);
+		text-decoration: none;
+		cursor: pointer;
+		font-family: inherit;
+		font-size: var(--text-label-size);
+		font-weight: var(--font-weight-normal);
+		line-height: var(--text-label-leading);
+		text-align: start;
+		box-sizing: border-box;
+		outline: 0 none;
+		outline-offset: 0;
+	}
+	.astryx-nav-item:is(:disabled, [aria-disabled='true']) {
+		cursor: default;
+	}
+	@media (hover: hover) {
+		.astryx-nav-item:hover:where(:not(:disabled, [aria-disabled='true'])) {
+			background-image: linear-gradient(var(--color-overlay-hover), var(--color-overlay-hover));
+		}
+	}
+	.astryx-nav-item:active:where(:not(:disabled, [aria-disabled='true'])) {
+		background-image: linear-gradient(var(--color-overlay-pressed), var(--color-overlay-pressed));
+	}
+	.astryx-nav-item:focus-visible,
+	.astryx-nav-item[data-focus-within-first]:has(> :first-child:focus-visible) {
+		outline: var(--focus-outline-width) var(--focus-outline-style) var(--focus-outline-color);
+		outline-offset: var(--focus-outline-offset);
+	}
+	.astryx-nav-item[data-size='sm'] {
+		min-height: var(--size-element-sm);
+		padding-inline: var(--spacing-1);
+	}
+	.astryx-nav-item[data-size='lg'] {
+		min-height: var(--size-element-lg);
+	}
+	.astryx-nav-item[data-selected] {
+		background-color: var(--color-neutral);
+		font-weight: var(--font-weight-medium);
+	}
+	.astryx-nav-item[data-selected]:is(:hover, :active) {
+		background-image: none;
+	}
+	@media (forced-colors: active) {
+		.astryx-nav-item[data-selected] {
+			background-color: Highlight;
+			color: HighlightText;
+		}
+	}
+	.astryx-nav-item[data-disabled] {
+		color: var(--color-text-disabled);
+		cursor: default;
+		pointer-events: none;
+	}
+}
