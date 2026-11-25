@@ -237,6 +237,8 @@ export {
 export {
 	default as TimeInput,
 	type TimeInputHourFormat,
+	type TimeInputNativePicker,
+	type TimeInputPresentation,
 	type TimeInputSize
 } from './components/TimeInput/TimeInput.svelte';
 export type { TimeInputEntryError } from './components/TimeInput/typedTime.svelte.js';

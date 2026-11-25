@@ -2,7 +2,8 @@
 // Inc. The typed draft of a time field and its rejection, shared by TimeInput and DateTimeInput.
 // A rejection shows at Enter or blur, or under 'complete' once the draft is complete, and stays
 // through edits that leave the draft rejected or unfinished. The hook becomes a class whose
-// options are read through a getter. Not yet ported: the native control's rejection.
+// options are read through a getter. A native time control reports its own rejection through
+// `surfaceRejection`.
 import type { FieldStatusInput } from '../Field/types.js';
 import type { EntryErrorBehavior } from '../DateInput/typedDate.svelte.js';
 import { isTimeInRange, type ISOTimeString } from '../../internal/date/timeParser.js';
@@ -58,6 +59,8 @@ export class TypedTimeField {
 	committedBy = $state<'enter' | 'blur' | null>(null);
 	/** The rejection last revealed; an edit that leaves the draft rejected keeps it. */
 	keptRejection = $state<TimeInputEntryError | null>(null);
+	/** A native control's edit outside `min` or `max`: it shows at once, until an accepted edit or a new value. */
+	surfaceRejection = $state<TimeInputEntryError | null>(null);
 	/** The time typing last committed, so its echo through `value` keeps the draft. */
 	#lastCommitted: { time: ISOTimeString | undefined } | null = null;
 	#reported: TimeInputEntryError | null = null;
@@ -104,7 +107,10 @@ export class TypedTimeField {
 	);
 	/** The rejection the field shows. A locked field hides it but keeps its state. */
 	entryError = $derived(
-		this.options.isLocked || this.draft.rejection == null ? null : (this.#freshRejection ?? this.keptRejection)
+		this.options.isLocked
+			? null
+			: (this.surfaceRejection ??
+					(this.draft.rejection == null ? null : (this.#freshRejection ?? this.keptRejection)))
 	);
 	/** A rejection shows: it sets `aria-invalid`. */
 	isRejected = $derived(this.entryError != null);
@@ -162,6 +168,7 @@ export class TypedTimeField {
 		if (this.#isKeeping) return;
 		if (this.#lastCommitted !== null && value === this.#lastCommitted.time) return;
 		this.#lastCommitted = null;
+		this.surfaceRejection = null;
 		if (this.pendingInput !== null) this.#drop();
 	}
 
