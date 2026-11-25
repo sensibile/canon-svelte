@@ -71,6 +71,18 @@
 		return parsed ? formatISOTime(parsed, false) : undefined;
 	}
 
+	// The native bounds snap inward to whole minutes: the control steps from `min`, so a `min` with
+	// seconds would put every minute-only value this segment writes out of step.
+	function minuteBound(bound: ISOTimeString | undefined, direction: 'up' | 'down'): string | undefined {
+		const parsed = bound ? parseISOTime(bound) : null;
+		if (!parsed) return undefined;
+		let minutes = parsed.hour * 60 + parsed.minute;
+		if (direction === 'up' && parsed.second > 0) minutes = Math.min(minutes + 1, 23 * 60 + 59);
+		return formatISOTime({ hour: Math.floor(minutes / 60), minute: minutes % 60, second: 0 }, false);
+	}
+	const nativeMin = $derived(minuteBound(min, 'up'));
+	const nativeMax = $derived(minuteBound(max, 'down'));
+
 	let isFocused = $state(false);
 	let isSegmentEditable = $state(false);
 	const nativeValue = $derived(normalize(value) ?? '');
@@ -153,8 +165,8 @@
 		bind:this={inputEl}
 		{id}
 		type="time"
-		min={min}
-		max={max}
+		min={nativeMin}
+		max={nativeMax}
 		step={60}
 		readonly={isDisabled || undefined}
 		aria-disabled={isDisabled ? 'true' : undefined}

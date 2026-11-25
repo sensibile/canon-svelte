@@ -312,6 +312,16 @@
 		};
 	});
 
+	/** Reports the row the wheel shows or is heading to, for a sheet closing before the scroll settles. */
+	export function flush() {
+		const el = scroller;
+		const size = rowSize();
+		if (!el || size === 0 || options.length === 0) return;
+		const index = steered ?? Math.min(options.length - 1, Math.max(0, Math.round(el.scrollTop / size)));
+		const option = options[nearestEnabledIndex(options, index, selectedIndex)];
+		if (option != null && !option.isDisabled && option.value !== value) onChange(option.value);
+	}
+
 	function moveTo(row: number | null) {
 		const option = row == null ? undefined : options[row];
 		if (row == null || option == null || option.isDisabled) return;

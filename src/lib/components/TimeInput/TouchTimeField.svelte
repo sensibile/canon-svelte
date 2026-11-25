@@ -168,8 +168,15 @@
 		isSheetOpen = true;
 	}
 
-	// Saving an empty field keeps the time the wheels show.
+	let hourWheel: Wheel | undefined = $state();
+	let minuteWheel: Wheel | undefined = $state();
+	let secondWheel: Wheel | undefined = $state();
+	let meridiemWheel: Wheel | undefined = $state();
+
+	// Saving keeps the time the wheels show: a scroll that hasn't settled yet counts, and so does the
+	// fallback time of an empty field.
 	function save() {
+		for (const wheel of [hourWheel, minuteWheel, secondWheel, meridiemWheel]) wheel?.flush();
 		if (timeValue === undefined) commit(compose({}));
 		isSheetOpen = false;
 	}
@@ -269,6 +276,7 @@
 		<div class="sheet-body">
 			<div class="wheels">
 				<Wheel
+					bind:this={hourWheel}
 					label="Hour"
 					options={hourOptions}
 					value={hourFormat === '24h' ? wheelTime.hour : hour12From24(wheelTime.hour)}
@@ -276,6 +284,7 @@
 					onChange={(hour) => commit(hourFormat === '24h' ? compose({ hour24: hour }) : compose({ hour12: hour }))}
 				/>
 				<Wheel
+					bind:this={minuteWheel}
 					label="Minute"
 					options={minuteOptions}
 					value={wheelTime.minute}
@@ -284,6 +293,7 @@
 				/>
 				{#if hasSeconds}
 					<Wheel
+						bind:this={secondWheel}
 						label="Second"
 						options={secondOptions}
 						value={wheelTime.second}
@@ -293,6 +303,7 @@
 				{/if}
 				{#if hourFormat === '12h'}
 					<Wheel
+						bind:this={meridiemWheel}
 						label="AM/PM"
 						options={meridiemOptions}
 						value={wheelTime.hour < 12 ? 0 : 1}

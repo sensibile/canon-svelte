@@ -139,8 +139,19 @@
 	const anchorMonthIndex = monthIndexOf(selectedDate ?? today);
 	const minBound = $derived(min != null ? monthIndexOf(plainDateFromISO(min)) : null);
 	const maxBound = $derived(max != null ? monthIndexOf(plainDateFromISO(max)) : null);
-	const minMonthIndex = $derived(minBound ?? Math.min(anchorMonthIndex, maxBound ?? anchorMonthIndex) - DEFAULT_MONTH_REACH);
-	const maxMonthIndex = $derived(maxBound ?? Math.max(anchorMonthIndex, minBound ?? anchorMonthIndex) + DEFAULT_MONTH_REACH);
+	// A value set from outside beyond that reach (a date loaded later) widens it to hold the value.
+	let reachLow = $state(anchorMonthIndex);
+	let reachHigh = $state(anchorMonthIndex);
+	$effect(() => {
+		if (selectedDate == null) return;
+		const index = monthIndexOf(selectedDate);
+		untrack(() => {
+			if (index < reachLow - DEFAULT_MONTH_REACH) reachLow = index;
+			if (index > reachHigh + DEFAULT_MONTH_REACH) reachHigh = index;
+		});
+	});
+	const minMonthIndex = $derived(minBound ?? Math.min(reachLow, maxBound ?? reachLow) - DEFAULT_MONTH_REACH);
+	const maxMonthIndex = $derived(maxBound ?? Math.max(reachHigh, minBound ?? reachHigh) + DEFAULT_MONTH_REACH);
 	let chosenMonthIndex = $state<number | null>(null);
 	const monthIndex = $derived(clampIndex(chosenMonthIndex ?? anchorMonthIndex, minMonthIndex, maxMonthIndex));
 	const monthYearLabel = $derived(formatCalendarMonthLabel(monthAt(monthIndex), locale));
@@ -163,6 +174,8 @@
 	function openSheet() {
 		if (isLocked) return;
 		isWheelOpen = false;
+		// The sheet opens on the picked date's month, wherever the calendar was left.
+		if (selectedDate != null) goToMonth(monthIndexOf(selectedDate), 'instant');
 		isSheetOpen = true;
 	}
 

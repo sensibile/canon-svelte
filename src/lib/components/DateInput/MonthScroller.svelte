@@ -201,7 +201,9 @@
 				{@const weeks = calendarMonthWeeks(month, weekStartsOn, false).weeks}
 				{@const monthLabel = formatCalendarMonthLabel(month, locale)}
 				{@const tabbableISO =
-					focusedDate != null && isInCalendarMonth(focusedDate, month)
+					row !== centerRow
+						? null
+						: focusedDate != null && isInCalendarMonth(focusedDate, month)
 						? plainDateToISO(focusedDate)
 						: selectedDate != null && isInCalendarMonth(selectedDate, month)
 							? plainDateToISO(selectedDate)
