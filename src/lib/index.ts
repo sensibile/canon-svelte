@@ -226,6 +226,8 @@ export {
 export {
 	default as DateInput,
 	type DateInputFormat,
+	type DateInputNativePicker,
+	type DateInputPresentation,
 	type DateInputSize
 } from './components/DateInput/DateInput.svelte';
 export type { DateInputEntryError, EntryErrorBehavior } from './components/DateInput/typedDate.svelte.js';
