@@ -132,11 +132,15 @@
 
 	const today = plainDateToday();
 	const selectedDate = $derived(value != null && ISO_DATE.test(value) ? plainDateFromISO(value) : null);
-	// The months reach from `min` to `max`, or 50 years either side of the date the field opened on.
+	// The months reach from `min` to `max`, or 50 years either side of the date the field opened on. A
+	// missing end reaches 50 years past the given one when that lies beyond the anchor, so the range
+	// always holds both.
 	// svelte-ignore state_referenced_locally (the anchor is fixed when the field mounts)
 	const anchorMonthIndex = monthIndexOf(selectedDate ?? today);
-	const minMonthIndex = $derived(min != null ? monthIndexOf(plainDateFromISO(min)) : anchorMonthIndex - DEFAULT_MONTH_REACH);
-	const maxMonthIndex = $derived(max != null ? monthIndexOf(plainDateFromISO(max)) : anchorMonthIndex + DEFAULT_MONTH_REACH);
+	const minBound = $derived(min != null ? monthIndexOf(plainDateFromISO(min)) : null);
+	const maxBound = $derived(max != null ? monthIndexOf(plainDateFromISO(max)) : null);
+	const minMonthIndex = $derived(minBound ?? Math.min(anchorMonthIndex, maxBound ?? anchorMonthIndex) - DEFAULT_MONTH_REACH);
+	const maxMonthIndex = $derived(maxBound ?? Math.max(anchorMonthIndex, minBound ?? anchorMonthIndex) + DEFAULT_MONTH_REACH);
 	let chosenMonthIndex = $state<number | null>(null);
 	const monthIndex = $derived(clampIndex(chosenMonthIndex ?? anchorMonthIndex, minMonthIndex, maxMonthIndex));
 	const monthYearLabel = $derived(formatCalendarMonthLabel(monthAt(monthIndex), locale));

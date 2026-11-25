@@ -157,7 +157,10 @@
 		if (nextIndex < minMonthIndex || nextIndex > maxMonthIndex) return;
 		shouldRestoreFocus = true;
 		focusedDate = next;
-		if (nextIndex !== monthIndexOf(from)) scrollToMonth(nextIndex, 'smooth');
+		if (nextIndex === monthIndexOf(from)) return;
+		// The scroll this starts is steered, so it reports nothing itself: report the month here.
+		scrollToMonth(nextIndex, 'smooth');
+		onVisibleMonthChange(nextIndex);
 	}
 
 	function onDayKeydown(e: KeyboardEvent, date: PlainDate) {
