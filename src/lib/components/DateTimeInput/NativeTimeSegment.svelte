@@ -60,6 +60,7 @@
 		inputEl = $bindable(),
 		onfocus,
 		onblur,
+		onkeyup,
 		...rest
 	}: Props = $props();
 
@@ -76,11 +77,22 @@
 	const overlayText = $derived(nativeValue ? formatLocaleTime(nativeValue as ISOTimeString, locale, hourFormat, false) : placeholder);
 	const showsOverlay = $derived(!!overlayText && !(isFocused && isSegmentEditable));
 
+	// The last value this segment reported, so a different incoming value can be told apart as a
+	// replacement from outside, which shows even while the control has focus.
+	let lastReported: ISOTimeString | undefined = undefined;
+
+	function report(next: ISOTimeString | undefined) {
+		lastReported = next;
+		onChange(next);
+	}
+
 	function commit(text: string) {
 		if (isDisabled) return;
 		if (!text) {
+			// Deleting one segment leaves the control empty but holding a partial entry: that isn't a clear.
+			if (inputEl?.validity.badInput) return;
 			onRejectedChange(null);
-			if (value !== undefined) onChange(undefined);
+			if (value !== undefined) report(undefined);
 			return;
 		}
 		const normalized = normalize(text);
@@ -91,13 +103,23 @@
 			return;
 		}
 		onRejectedChange(null);
-		if (normalized !== value) onChange(normalized);
+		if (normalized !== value) report(normalized);
 	}
 
-	// The control shows the committed time whenever it doesn't have focus.
+	// Clearing the last segment of a partial entry fires no input event (the value stays empty), so a
+	// fully cleared control is caught as the keys go up and at blur.
+	function commitIfCleared() {
+		if (inputEl && inputEl.value === '' && !inputEl.validity.badInput && value !== undefined) commit('');
+	}
+
+	// The control shows the committed time whenever it doesn't have focus, and while it has focus when
+	// the value was replaced from outside rather than by this control's own edit.
 	$effect(() => {
 		const v = nativeValue;
-		if (!isFocused && inputEl && inputEl.value !== v) inputEl.value = v;
+		const focused = isFocused;
+		const replaced = normalize(value) !== normalize(lastReported);
+		if (inputEl && inputEl.value !== v && (!focused || replaced)) inputEl.value = v;
+		lastReported = value;
 	});
 
 	$effect(() => {
@@ -149,7 +171,12 @@
 			isFocused = true;
 			onfocus?.(e);
 		}}
+		onkeyup={(e) => {
+			commitIfCleared();
+			onkeyup?.(e);
+		}}
 		onblur={(e) => {
+			commitIfCleared();
 			isFocused = false;
 			onblur?.(e);
 		}}

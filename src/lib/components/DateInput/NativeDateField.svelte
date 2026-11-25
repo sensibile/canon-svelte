@@ -92,6 +92,8 @@
 		onfocus,
 		onblur,
 		onkeydown,
+		onkeyup,
+		name,
 		...rest
 	}: Props = $props();
 
@@ -155,13 +157,14 @@
 		if (reported != null) onEntryErrorChange?.(null);
 	});
 
-	// A value from outside replaces a refusal.
+	// A value from outside replaces a refusal, and shows in the control even while it has focus.
 	let lastValue = $state.snapshot(value);
 	$effect(() => {
 		if (value !== lastValue) {
 			lastValue = value;
 			held = null;
 			shown = null;
+			if (inputEl) inputEl.value = value != null && ISO_DATE.test(value) ? value : '';
 		}
 	});
 
@@ -179,6 +182,8 @@
 	function commitText(text: string) {
 		if (isLocked) return;
 		if (!text) {
+			// Deleting one segment leaves the control empty but holding a partial entry: that isn't a clear.
+			if (inputEl?.validity.badInput) return;
 			held = null;
 			shown = null;
 			if (value !== undefined) fireChange(undefined);
@@ -194,6 +199,12 @@
 		held = null;
 		shown = null;
 		if (text !== value) fireChange(text as ISODateString);
+	}
+
+	// Clearing the last segment of a partial entry fires no input event (the value stays empty), so a
+	// fully cleared control is caught as the keys go up and at blur.
+	function commitIfCleared() {
+		if (inputEl && inputEl.value === '' && !inputEl.validity.badInput && value !== undefined) commitText('');
 	}
 
 	function commitRefusal() {
@@ -275,6 +286,7 @@
 					bind:this={inputEl}
 					{id}
 					type="date"
+					name={isDisabled ? undefined : name}
 					{min}
 					{max}
 					readonly={isLocked || undefined}
@@ -294,7 +306,12 @@
 						isFocused = true;
 						onfocus?.(e);
 					}}
+					onkeyup={(e) => {
+						commitIfCleared();
+						onkeyup?.(e);
+					}}
 					onblur={(e) => {
+						commitIfCleared();
 						const text = inputEl?.value;
 						isFocused = false;
 						if (text !== undefined && text !== nativeValue && held == null) commitText(text);

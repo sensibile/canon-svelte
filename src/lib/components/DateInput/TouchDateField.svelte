@@ -104,6 +104,7 @@
 		'aria-labelledby': labelledByProp,
 		onclick,
 		onkeydown,
+		name,
 		...rest
 	}: Props = $props();
 
@@ -249,6 +250,7 @@
 				{...rest}
 				bind:this={inputEl}
 				{id}
+				name={isDisabled ? undefined : name}
 				type="text"
 				role="combobox"
 				value={displayValue}

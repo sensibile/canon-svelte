@@ -99,6 +99,7 @@
 		'aria-labelledby': labelledByProp,
 		onclick,
 		onkeydown,
+		name,
 		...rest
 	}: Props = $props();
 
@@ -167,6 +168,12 @@
 		isSheetOpen = true;
 	}
 
+	// Saving an empty field keeps the time the wheels show.
+	function save() {
+		if (timeValue === undefined) commit(compose({}));
+		isSheetOpen = false;
+	}
+
 	const describedBy = $derived(
 		[
 			inputGroup?.describedByIDs,
@@ -208,6 +215,7 @@
 			<input
 				{...rest}
 				{id}
+				name={isDisabled ? undefined : name}
 				type="text"
 				role="combobox"
 				value={displayValue}
@@ -230,8 +238,11 @@
 					onclick?.(e);
 				}}
 				onkeydown={(e) => {
-					// Enter in a disabled field would submit a surrounding form.
-					if (isLocked && e.key === 'Enter') e.preventDefault();
+					// The keys that open the sheet; Enter in a disabled field would also submit a surrounding form.
+					if (!e.isComposing && e.keyCode !== 229 && ['ArrowDown', 'Enter', ' ', 'Spacebar'].includes(e.key)) {
+						e.preventDefault();
+						openSheet();
+					}
 					onkeydown?.(e);
 				}}
 			/>
@@ -291,7 +302,7 @@
 				{/if}
 			</div>
 			<div class="footer">
-				<Button variant="primary" size="md" width="100%" label="Save" onclick={() => (isSheetOpen = false)} />
+				<Button variant="primary" size="md" width="100%" label="Save" onclick={save} />
 			</div>
 		</div>
 	</BottomSheet>
