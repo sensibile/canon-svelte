@@ -176,6 +176,8 @@
 		if (isLocked) return;
 		lastValue = next;
 		value = next;
+		// The external-value sync skips a change made here, so the control follows it directly (Clear).
+		if (inputEl && inputEl.value !== (next ?? '')) inputEl.value = next ?? '';
 		onChange?.(next);
 	}
 
@@ -319,7 +321,8 @@
 						onblur?.(e);
 					}}
 					onkeydown={(e) => {
-						if (isLocked && e.key === 'Enter') e.preventDefault();
+						// A refused date stays in the control, so Enter must not submit it with a surrounding form.
+						if (e.key === 'Enter' && (isLocked || held != null || shown != null)) e.preventDefault();
 						if (e.key === 'Enter') commitRefusal();
 						onkeydown?.(e);
 					}}
