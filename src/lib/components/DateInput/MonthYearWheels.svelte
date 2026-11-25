@@ -39,10 +39,20 @@
 		for (let year = first; year <= last; year++) years.push({ value: year, label: String(year) });
 		return years;
 	});
+
+	let monthWheel: Wheel | undefined = $state();
+	let yearWheel: Wheel | undefined = $state();
+
+	/** Reports the rows the wheels show, for closing them before a scroll settles. */
+	export function flush() {
+		monthWheel?.flush();
+		yearWheel?.flush();
+	}
 </script>
 
 <div class="astryx-month-year-wheels wheels">
 	<Wheel
+		bind:this={monthWheel}
 		label="Month"
 		options={monthOptions}
 		value={current.month}
@@ -50,6 +60,7 @@
 		onChange={(month) => onChange(toMonthIndex(current.year, month))}
 	/>
 	<Wheel
+		bind:this={yearWheel}
 		label="Year"
 		options={yearOptions}
 		value={current.year}

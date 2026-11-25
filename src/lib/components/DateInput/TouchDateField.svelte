@@ -171,6 +171,14 @@
 		onChange?.(next);
 	}
 
+	let wheels: MonthYearWheels | undefined = $state();
+
+	// Closing the wheels keeps the month they show, even mid-scroll.
+	function closeWheels() {
+		wheels?.flush();
+		isWheelOpen = false;
+	}
+
 	function openSheet() {
 		if (isLocked) return;
 		isWheelOpen = false;
@@ -319,7 +327,7 @@
 					data-title="month-year"
 					aria-expanded={isWheelOpen}
 					aria-label="Choose month and year, {monthYearLabel}"
-					onclick={() => (isWheelOpen = !isWheelOpen)}
+					onclick={() => (isWheelOpen ? closeWheels() : (isWheelOpen = true))}
 				>
 					<span class="title-text">{monthYearLabel}</span>
 					<span class="title-chevron" class:open={isWheelOpen}><Icon icon="chevronDown" size="sm" color="secondary" /></span>
@@ -375,6 +383,7 @@
 				</div>
 				<div class="panel overlay swap" class:hidden={!isWheelOpen} inert={!isWheelOpen || undefined} data-panel="wheels">
 					<MonthYearWheels
+						bind:this={wheels}
 						{monthIndex}
 						{minMonthIndex}
 						{maxMonthIndex}
@@ -389,7 +398,7 @@
 					<Button variant="primary" size="md" width="100%" label="Save" onclick={() => (isSheetOpen = false)} />
 				</div>
 				<div class="footer-action overlay swap" class:hidden={!isWheelOpen} inert={!isWheelOpen || undefined}>
-					<Button variant="secondary" size="md" width="100%" label="Done" onclick={() => (isWheelOpen = false)} />
+					<Button variant="secondary" size="md" width="100%" label="Done" onclick={closeWheels} />
 				</div>
 			</div>
 		</div>
