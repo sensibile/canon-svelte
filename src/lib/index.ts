@@ -226,6 +226,8 @@ export {
 export {
 	default as DateInput,
 	type DateInputFormat,
+	type DateInputNativePicker,
+	type DateInputPresentation,
 	type DateInputSize
 } from './components/DateInput/DateInput.svelte';
 export type { DateInputEntryError, EntryErrorBehavior } from './components/DateInput/typedDate.svelte.js';
@@ -237,6 +239,8 @@ export {
 export {
 	default as TimeInput,
 	type TimeInputHourFormat,
+	type TimeInputNativePicker,
+	type TimeInputPresentation,
 	type TimeInputSize
 } from './components/TimeInput/TimeInput.svelte';
 export type { TimeInputEntryError } from './components/TimeInput/typedTime.svelte.js';
